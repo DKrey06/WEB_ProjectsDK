@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>О нас</title>
-</head>
+{% block title %}
+Страница о нас
+{% endblock %}
 
-<body>
-	<h1>About us</h1>
-	<p>Страничка о нас</p>
-</body>
-
-</html>
+{% block body %}
+<h1>О нас</h1>
+<p>Мы крутые перцы</p>
+{% endblock %}
