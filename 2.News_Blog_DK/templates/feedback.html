@@ -4,7 +4,60 @@
 Обратная связь
 {% endblock %}
 
-{% block body %}
+{% block content %}
 <h1>Обратная связь</h1>
 <p>Заполните форму для обратной связи</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+	role="alert">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<form name="feedback" method="POST">
+	<ul class="form-list">
+		<li>
+			<label>Ваше имя:</label>
+			<div>
+				<input class="form-control {% if errors and errors.username %}is-invalid{% endif %}" type="text"
+					name="username" maxlength="30" value="{{ username if username else '' }}">
+			</div>
+			{% if errors and errors.username %}
+			<div class="invalid-feedback d-block">{{ errors.username }}</div>
+			{% endif %}
+		</li>
+		<li>
+			<label>Электронная почта:</label>
+			<div>
+				<input class="form-control {% if errors and errors.usermail %}is-invalid{% endif %}" type="text"
+					name="usermail" maxlength="50" value="{{ usermail if usermail else '' }}">
+			</div>
+			{% if errors and errors.usermail %}
+			<div class="invalid-feedback d-block">{{ errors.usermail }}</div>
+			{% endif %}
+		</li>
+		<li>
+			<label>Текст сообщения:</label>
+			<div>
+				<textarea class="form-control {% if errors and errors.textmess %}is-invalid{% endif %}" name="textmess"
+					rows="5">{{ textmess if textmess else '' }}</textarea>
+			</div>
+			{% if errors and errors.textmess %}
+			<div class="invalid-feedback d-block">{{ errors.textmess }}</div>
+			{% endif %}
+		</li>
+		<li>
+			<label></label>
+			<div>
+				<button id="send_mess" type="submit" class="btn btn-primary">отправить сообщение</button>
+			</div>
+		</li>
+	</ul>
+</form>
 {% endblock %}
