@@ -10,7 +10,6 @@ header {
 	background-color: white;
 	-webkit-box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
 	box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
-
 }
 
 .header_img {
@@ -18,10 +17,15 @@ header {
 	max-width: 200px;
 }
 
-.footer_img {
+.footer1_img {
 	width: 50%;
 	max-width: 200px;
+}
 
+.footer2_img {
+	margin-right: 25px;
+	width: 50%;
+	max-width: 150px;
 }
 
 .page {
@@ -39,4 +43,8 @@ header {
 
 .form-list {
 	list-style-type: none;
+}
+
+.featurette-divider {
+	margin: 5rem 0;
 }
