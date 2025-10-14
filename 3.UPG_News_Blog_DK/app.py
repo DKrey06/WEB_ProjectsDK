@@ -1,8 +1,51 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,flash,url_for,redirect
 import re
 from datetime import datetime, timedelta
+from models import db, User, Article
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///news_blog_DK.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+def init_db():
+    with app.app_context():
+        db.create_all() 
+        
+        test_user = User(
+            name='Дмитрий Кретов', 
+            email='mrdmitry2006@mail.ru',
+            hashed_password=generate_password_hash('123456')
+        )
+        db.session.add(test_user)
+        db.session.commit()
+        
+        articles_data = [
+            {
+                'title': 'Первая новость',
+                'text': 'Текст первой новости'
+            },
+            {
+                'title': 'Вторая новость',
+                'text': 'Текст второй новости'
+            },
+            {
+                'title': 'Третья новость', 
+                'text': 'Текст третьей новости'
+            }
+        ]
+            
+        for article_data in articles_data:
+            article = Article(
+                title=article_data['title'],
+                text=article_data['text'],
+                author=test_user  
+            )
+            db.session.add(article)
+        
+        db.session.commit()
 
 def get_articles():
     return [
@@ -98,5 +141,39 @@ def news(id):
     
     return render_template('news_detail.html', article=article)
 
+@app.route('/create-article', methods=['POST', 'GET'])
+def create_article():
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        text = request.form.get('text', '').strip()
+        errors = {}
+
+        if not title:
+            errors['title'] = 'Обязательно введите заголовок'
+        if not text:
+            errors['text'] = 'Обязательно введите текст статьи'
+
+        if errors:
+            return render_template('create_article.html', errors=errors, title=title, text=text)
+
+        author = User.query.first()
+        if not author:
+            flash('В базе данных нет пользователей', 'error')
+            return render_template('create_article.html', title=title, text=text)
+        
+        article = Article(
+            title=title,
+            text=text,
+            author=author,
+        )
+
+        db.session.add(article)
+        db.session.commit()
+        flash('Статья создана!', 'success')
+        return redirect(url_for('index'))
+
+    return render_template('create_article.html')
+
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True)
