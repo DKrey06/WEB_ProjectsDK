@@ -192,6 +192,11 @@ def delete_article(id):
     db.session.commit()
     return redirect(url_for('index'))
 
+@app.route("/articles")
+def articles():
+    articles = get_articles()
+    return render_template('articles.html', articles=articles)
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
