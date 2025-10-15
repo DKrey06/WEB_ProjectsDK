@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request,flash,url_for,redirect
+from flask import Flask, render_template, request, flash, url_for, redirect
 import re
 from datetime import datetime, timedelta
 from models import db, User, Article
@@ -7,90 +7,70 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///news_blog_DK.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = '123456'
 
 db.init_app(app)
 
 def init_db():
     with app.app_context():
         db.create_all() 
-        
-        test_user = User(
-            name='Дмитрий Кретов', 
-            email='mrdmitry2006@mail.ru',
-            hashed_password=generate_password_hash('123456')
-        )
-        db.session.add(test_user)
-        db.session.commit()
-        
-        articles_data = [
-            {
-                'title': 'Первая новость',
-                'text': 'Текст первой новости'
-            },
-            {
-                'title': 'Вторая новость',
-                'text': 'Текст второй новости'
-            },
-            {
-                'title': 'Третья новость', 
-                'text': 'Текст третьей новости'
-            }
-        ]
-            
-        for article_data in articles_data:
-            article = Article(
-                title=article_data['title'],
-                text=article_data['text'],
-                author=test_user  
+
+        test_user = User.query.filter_by(email='mrdmitry2006@mail.ru').first()
+        if not test_user:
+            test_user = User(
+                name='Дмитрий Кретов', 
+                email='mrdmitry2006@mail.ru',
+                hashed_password=generate_password_hash('123456')
             )
-            db.session.add(article)
+            db.session.add(test_user)
+            db.session.commit()
         
-        db.session.commit()
+        if Article.query.count() == 0:
+            articles_data = [
+                {
+                    'title': 'Первая новость',
+                    'text': 'Текст первой новости'
+                },
+                {
+                    'title': 'Вторая новость',
+                    'text': 'Текст второй новости'
+                },
+                {
+                    'title': 'Третья новость', 
+                    'text': 'Текст третьей новости'
+                }
+            ]
+                
+            for article_data in articles_data:
+                article = Article(
+                    title=article_data['title'],
+                    text=article_data['text'],
+                    author=test_user,
+                    created_date=datetime.now()
+                )
+                db.session.add(article)
+            
+            db.session.commit()
 
 def get_articles():
-    return [
-        {
-            'id': 1,
-            'title': 'Статья 1',
-            'date': datetime.now(),
-            'preview': 'Описание статьи',
-            'content': 'Какой-то мега крутой текст :)'
-        },
-        {
-            'id': 2,
-            'title': 'Статья 2',
-            'date': datetime.now() - timedelta(days=1),
-            'preview': 'Мега описание статейки',
-            'content': 'Супер пупер текст'
-        },
-        {
-            'id': 3,
-            'title': 'Статья 3',
-            'date': datetime.now() - timedelta(days=2),
-            'preview': 'Нереальное превью статьи',
-            'content': 'Уникальный текст про статью'
-        },
-        {
-            'id': 4,
-            'title': 'Статья 4',
-            'date': datetime.now() ,
-            'preview': 'Описание не придумали',
-            'content': 'Текст статьи тоже не написали еще'
-        },
-        {
-            'id': 5,
-            'title': 'Статья 5',
-            'date': datetime.now() - timedelta(days=15),
-            'preview': 'Описательное описание',
-            'content': 'Текстовый текст'
-        }
-    ]
+    articles_from_db = Article.query.order_by(Article.created_date.desc()).all()
+    
+    articles = []
+    for article in articles_from_db:
+        articles.append({
+            'id': article.id,
+            'title': article.title,
+            'date': article.created_date,
+            'preview': article.text[:100] + '...' if len(article.text) > 100 else article.text,
+            'content': article.text,
+            'author': article.author.name
+        })
+    
+    return articles
 
 @app.context_processor
 def inject_today():
     return {'today': datetime.now().date()}
-
-
 
 @app.route("/")
 def index():
@@ -133,13 +113,18 @@ def feedback():
 
 @app.route('/news/<int:id>')
 def news(id):
-    articles = get_articles()
-    article = next((article for article in articles if article['id'] == id), None)
+    article = Article.query.get_or_404(id)
     
-    if article is None:
-        return "Статья не найдена", 404
+    article_data = {
+        'id': article.id,
+        'title': article.title,
+        'date': article.created_date,
+        'preview': article.text[:100] + '...' if len(article.text) > 100 else article.text,
+        'content': article.text,
+        'author': article.author.name
+    }
     
-    return render_template('news_detail.html', article=article)
+    return render_template('news_detail.html', article=article_data)
 
 @app.route('/create-article', methods=['POST', 'GET'])
 def create_article():
@@ -165,6 +150,7 @@ def create_article():
             title=title,
             text=text,
             author=author,
+            created_date=datetime.now()
         )
 
         db.session.add(article)
@@ -173,6 +159,39 @@ def create_article():
         return redirect(url_for('index'))
 
     return render_template('create_article.html')
+
+@app.route('/edit-article/<int:id>', methods=['POST', 'GET'])
+def edit_article(id):
+    article = Article.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        text = request.form.get('text', '').strip()
+        errors = {}
+
+        if not title:
+            errors['title'] = 'Обязательно введите заголовок'
+        if not text:
+            errors['text'] = 'Обязательно введите текст статьи'
+
+        if errors:
+            return render_template('edit_article.html', errors=errors, title=title, text=text, article=article)
+
+        article.title = title
+        article.text = text
+        
+        db.session.commit()
+        return redirect(url_for('news', id=article.id))
+
+    return render_template('edit_article.html', article=article)
+
+@app.route('/delete-article/<int:id>', methods=['POST'])
+def delete_article(id):
+    article = Article.query.get_or_404(id)
+    
+    db.session.delete(article)
+    db.session.commit()
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     init_db()
