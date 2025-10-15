@@ -155,7 +155,6 @@ def create_article():
 
         db.session.add(article)
         db.session.commit()
-        flash('Статья создана!', 'success')
         return redirect(url_for('index'))
 
     return render_template('create_article.html')
