@@ -39,6 +39,9 @@
 			{% if article.author %}
 			<p class="text-muted mb-0">Автор: {{ article.author }}</p>
 			{% endif %}
+			{% if article.category %}
+			<p class="text-muted mb-0">Категория: {{ article.category }}</p>
+			{% endif %}
 		</header>
 
 		<div class="article-content mb-5">
