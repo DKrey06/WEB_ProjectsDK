@@ -31,6 +31,8 @@ class Article(db.Model):
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 	category = db.Column(db.String(50), nullable=False, default='general')
 
+	comments = db.relationship('Comment', backref='article', lazy=True, cascade='all, delete-orphan')
+
 class Comment(db.Model):
 	__tablename__ = 'comment'
 
