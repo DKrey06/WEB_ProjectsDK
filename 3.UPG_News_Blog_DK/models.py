@@ -30,3 +30,12 @@ class Article(db.Model):
 	created_date = db.Column(db.DateTime, default=datetime.now)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 	category = db.Column(db.String(50), nullable=False, default='general')
+
+class Comment(db.Model):
+	__tablename__ = 'comment'
+
+	id = db.Column(db.Integer, primary_key=True)
+	text = db.Column(db.Text, nullable=False)
+	date = db.Column(db.DateTime, default=datetime.now)
+	article_id = db.Column(db.Integer, db.ForeignKey('article.id'), nullable=False)
+	author_name= db.Column(db.String(100), nullable=False)
