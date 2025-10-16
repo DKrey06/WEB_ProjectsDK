@@ -13,6 +13,18 @@
 		</ol>
 	</nav>
 
+	{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+	{% for category, message in messages %}
+	<div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+		role="alert">
+		{{ message }}
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+	{% endfor %}
+	{% endif %}
+	{% endwith %}
+
 	<article class="news-detail">
 		<header class="mb-4 pb-3 border-bottom">
 			<div class="d-flex justify-content-between align-items-start">
@@ -31,6 +43,54 @@
 
 		<div class="article-content mb-5">
 			<p class="lead">{{ article.content }}</p>
+		</div>
+
+		<div class="comments-section mt-5">
+			<h4 class="mb-4">Комментарии ({{ comments|length }})</h4>
+
+			<div class="card mb-4">
+				<div class="card-body">
+					<h5 class="card-title">Добавить комментарий</h5>
+					<form method="POST" action="{{ url_for('add_comment', article_id=article.id) }}">
+						<div class="mb-3">
+							<label class="form-label">Ваше имя:</label>
+							<input type="text"
+								class="form-control {% if errors and errors.author_name %}is-invalid{% endif %}"
+								name="author_name" maxlength="100" value="{{ author_name if author_name else '' }}">
+							{% if errors and errors.author_name %}
+							<div class="invalid-feedback d-block">{{ errors.author_name }}</div>
+							{% endif %}
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Текст комментария:</label>
+							<textarea class="form-control {% if errors and errors.comment_text %}is-invalid{% endif %}"
+								name="comment_text" rows="4">{{ comment_text if comment_text else '' }}</textarea>
+							{% if errors and errors.comment_text %}
+							<div class="invalid-feedback d-block">{{ errors.comment_text }}</div>
+							{% endif %}
+						</div>
+						<button type="submit" class="btn btn-primary">Отправить комментарий</button>
+					</form>
+				</div>
+			</div>
+
+			{% if comments %}
+			{% for comment in comments %}
+			<div class="card mb-3">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-start mb-2">
+						<h6 class="card-subtitle mb-1 text-primary">{{ comment.author_name }}</h6>
+						<small class="text-muted">{{ comment.date.strftime('%d.%m.%Y в %H:%M') }}</small>
+					</div>
+					<p class="card-text">{{ comment.text }}</p>
+				</div>
+			</div>
+			{% endfor %}
+			{% else %}
+			<div class="text-center py-4">
+				<p class="text-muted">Пока нет комментариев. Будьте первым!</p>
+			</div>
+			{% endif %}
 		</div>
 
 		<div class="mt-5 pt-3 border-top d-flex justify-content-between">

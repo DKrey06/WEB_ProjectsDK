@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, flash, url_for, redirect
 import re
 from datetime import datetime, timedelta
-from models import db, User, Article
+from models import db, User, Article, Comment
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -133,6 +133,8 @@ def feedback():
 @app.route('/news/<int:id>')
 def news(id):
     article = Article.query.get_or_404(id)
+
+    comments = Comment.query.filter_by(article_id=id).order_by(Comment.date.desc()).all()
     
     article_data = {
         'id': article.id,
@@ -144,7 +146,49 @@ def news(id):
         'category': article.category
     }
     
-    return render_template('news_detail.html', article=article_data)
+    return render_template('news_detail.html', article=article_data, comments=comments)
+
+@app.route('/add-comment/<int:article_id>', methods=['POST'])
+def add_comment(article_id):
+    article = Article.query.get_or_404(article_id)
+    
+    author_name = request.form.get('author_name', '').strip()
+    comment_text = request.form.get('comment_text', '').strip()
+    errors = {}
+    
+    if not author_name:
+        errors['author_name'] = 'Обязательно введите имя'
+    if not comment_text:
+        errors['comment_text'] = 'Обязательно введите текст комментария'
+    
+    if errors:
+        comments = Comment.query.filter_by(article_id=article_id).order_by(Comment.date.desc()).all()
+        article_data = {
+            'id': article.id,
+            'title': article.title,
+            'date': article.created_date,
+            'preview': article.text[:100] + '...' if len(article.text) > 100 else article.text,
+            'content': article.text,
+            'author': article.author.name,
+            'category': article.category
+        }
+        return render_template('news_detail.html', 
+                             article=article_data, 
+                             comments=comments,
+                             errors=errors,
+                             author_name=author_name,
+                             comment_text=comment_text)
+    comment = Comment(
+        text=comment_text,
+        author_name=author_name,
+        article_id=article_id,
+        date=datetime.now()
+    )
+    
+    db.session.add(comment)
+    db.session.commit()
+
+    return redirect(url_for('news', id=article_id))
 
 @app.route('/create-article', methods=['POST', 'GET'])
 def create_article():
