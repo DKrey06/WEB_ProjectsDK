@@ -29,3 +29,4 @@ class Article(db.Model):
 	text = db.Column(db.Text, nullable=False)
 	created_date = db.Column(db.DateTime, default=datetime.now)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+	category = db.Column(db.String(50), nullable=False, default='general')
