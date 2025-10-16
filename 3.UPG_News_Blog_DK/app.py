@@ -30,17 +30,17 @@ def init_db():
                 {
                     'title': 'Первая новость',
                     'text': 'Текст первой новости',
-                    'category': 'technology'
+                    'category': 'Технологии'
                 },
                 {
                     'title': 'Вторая новость',
                     'text': 'Текст второй новости',
-                    'category': 'science'
+                    'category': 'Медицина'
                 },
                 {
                     'title': 'Третья новость', 
                     'text': 'Текст третьей новости',
-                    'category': 'general'
+                    'category': 'Общее'
                 }
             ]
                 
