@@ -29,15 +29,18 @@ def init_db():
             articles_data = [
                 {
                     'title': 'Первая новость',
-                    'text': 'Текст первой новости'
+                    'text': 'Текст первой новости',
+                    'category': 'technology'
                 },
                 {
                     'title': 'Вторая новость',
-                    'text': 'Текст второй новости'
+                    'text': 'Текст второй новости',
+                    'category': 'science'
                 },
                 {
                     'title': 'Третья новость', 
-                    'text': 'Текст третьей новости'
+                    'text': 'Текст третьей новости',
+                    'category': 'general'
                 }
             ]
                 
@@ -45,6 +48,7 @@ def init_db():
                 article = Article(
                     title=article_data['title'],
                     text=article_data['text'],
+                    category=article_data['category'],
                     author=test_user,
                     created_date=datetime.now()
                 )
@@ -52,8 +56,13 @@ def init_db():
             
             db.session.commit()
 
-def get_articles():
-    articles_from_db = Article.query.order_by(Article.created_date.desc()).all()
+def get_articles(category=None):
+    query = Article.query
+    
+    if category:
+        query = query.filter_by(category=category)
+    
+    articles_from_db = query.order_by(Article.created_date.desc()).all()
     
     articles = []
     for article in articles_from_db:
@@ -63,14 +72,24 @@ def get_articles():
             'date': article.created_date,
             'preview': article.text[:100] + '...' if len(article.text) > 100 else article.text,
             'content': article.text,
-            'author': article.author.name
+            'author': article.author.name,
+            'category': article.category
         })
     
     return articles
 
+def get_categories():
+    categories = db.session.query(Article.category).distinct().all()
+    return [category[0] for category in categories]
+
 @app.context_processor
 def inject_today():
     return {'today': datetime.now().date()}
+
+@app.context_processor
+def inject_categories():
+    categories = get_categories()
+    return {'categories': categories}
 
 @app.route("/")
 def index():
@@ -121,7 +140,8 @@ def news(id):
         'date': article.created_date,
         'preview': article.text[:100] + '...' if len(article.text) > 100 else article.text,
         'content': article.text,
-        'author': article.author.name
+        'author': article.author.name,
+        'category': article.category
     }
     
     return render_template('news_detail.html', article=article_data)
@@ -131,24 +151,28 @@ def create_article():
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         text = request.form.get('text', '').strip()
+        category = request.form.get('category', 'general').strip()
         errors = {}
 
         if not title:
             errors['title'] = 'Обязательно введите заголовок'
         if not text:
             errors['text'] = 'Обязательно введите текст статьи'
+        if not category:
+            errors['category'] = 'Обязательно выберите категорию'
 
         if errors:
-            return render_template('create_article.html', errors=errors, title=title, text=text)
+            return render_template('create_article.html', errors=errors, title=title, text=text, category=category)
 
         author = User.query.first()
         if not author:
             flash('В базе данных нет пользователей', 'error')
-            return render_template('create_article.html', title=title, text=text)
+            return render_template('create_article.html', title=title, text=text, category=category)
         
         article = Article(
             title=title,
             text=text,
+            category=category,
             author=author,
             created_date=datetime.now()
         )
@@ -166,18 +190,22 @@ def edit_article(id):
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         text = request.form.get('text', '').strip()
+        category = request.form.get('category', 'general').strip()
         errors = {}
 
         if not title:
             errors['title'] = 'Обязательно введите заголовок'
         if not text:
             errors['text'] = 'Обязательно введите текст статьи'
+        if not category:
+            errors['category'] = 'Обязательно выберите категорию'
 
         if errors:
-            return render_template('edit_article.html', errors=errors, title=title, text=text, article=article)
+            return render_template('edit_article.html', errors=errors, title=title, text=text, category=category, article=article)
 
         article.title = title
         article.text = text
+        article.category = category
         
         db.session.commit()
         return redirect(url_for('news', id=article.id))
@@ -196,6 +224,17 @@ def delete_article(id):
 def articles():
     articles = get_articles()
     return render_template('articles.html', articles=articles)
+
+@app.route("/articles/<category>")
+def articles_by_category(category):
+    valid_categories = get_categories()
+    
+    if category not in valid_categories:
+        flash(f'Категории "{category}" не нашлось', 'error')
+        return redirect(url_for('articles'))
+    
+    articles = get_articles(category=category)
+    return render_template('articles.html', articles=articles, current_category=category)
 
 if __name__ == '__main__':
     init_db()
