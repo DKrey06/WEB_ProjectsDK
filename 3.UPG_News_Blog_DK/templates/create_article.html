@@ -31,6 +31,26 @@
 				<div class="invalid-feedback d-block">{{ errors.title }}</div>
 				{% endif %}
 			</div>
+
+			<div class="mb-3">
+				<label class="form-label">Категория:</label>
+				<select class="form-control {% if errors and errors.category %}is-invalid{% endif %}" name="category">
+					<option value="">Выберите категорию</option>
+					<option value="Технологии" {% if category=='Технологии' %}selected{% endif %}>Технологии</option>
+					<option value="Медицина" {% if category=='Медицина' %}selected{% endif %}>Медицина</option>
+					<option value="Общее" {% if category=='Общее' %}selected{% endif %}>Общее</option>
+					<option value="Наука" {% if category=='Наука' %}selected{% endif %}>Наука</option>
+					<option value="Спорт" {% if category=='Спорт' %}selected{% endif %}>Спорт</option>
+				</select>
+				{% if errors and errors.category %}
+				<div class="invalid-feedback d-block">{{ errors.category }}</div>
+				{% endif %}
+				<div class="form-text">
+					Или введите новую категорию:
+					<input type="text" class="form-control mt-1" name="new_category" placeholder="Новая категория">
+				</div>
+			</div>
+
 			<div class="mb-3">
 				<label class="form-label">Текст статьи:</label>
 				<textarea class="form-control {% if errors and errors.text %}is-invalid{% endif %}" name="text"
