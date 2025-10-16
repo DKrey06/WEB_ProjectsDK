@@ -214,7 +214,6 @@ def create_article():
 
         author = User.query.first()
         if not author:
-            flash('В базе данных нет пользователей', 'error')
             return render_template('create_article.html', title=title, text=text, category=category)
         
         article = Article(
@@ -286,7 +285,6 @@ def articles_by_category(category):
     valid_categories = get_categories()
     
     if category not in valid_categories:
-        flash(f'Категории "{category}" не нашлось', 'error')
         return redirect(url_for('articles'))
     
     articles = get_articles(category=category)
