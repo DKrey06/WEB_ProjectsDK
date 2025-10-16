@@ -1,6 +1,9 @@
 .news-detail {
 	max-width: 800px;
 	margin: 0 auto;
+	overflow-x: hidden;
+	position: relative;
+	z-index: 1;
 }
 
 .new-badge {
