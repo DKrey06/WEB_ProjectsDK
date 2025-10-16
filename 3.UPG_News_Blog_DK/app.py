@@ -230,6 +230,10 @@ def delete_article(id):
 
 @app.route("/articles")
 def articles():
+    category = request.args.get('category', '').strip()
+    if category:
+        return articles_by_category(category)
+    
     articles = get_articles()
     return render_template('articles.html', articles=articles)
 
