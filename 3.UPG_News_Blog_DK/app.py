@@ -151,15 +151,19 @@ def create_article():
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         text = request.form.get('text', '').strip()
-        category = request.form.get('category', 'general').strip()
+        category = request.form.get('category', '').strip()
+        new_category = request.form.get('new_category', '').strip()
         errors = {}
 
         if not title:
             errors['title'] = 'Обязательно введите заголовок'
         if not text:
             errors['text'] = 'Обязательно введите текст статьи'
-        if not category:
-            errors['category'] = 'Обязательно выберите категорию'
+        
+        if not category and not new_category:
+            errors['category'] = 'Обязательно выберите или введите категорию'
+        elif new_category:
+            category = new_category
 
         if errors:
             return render_template('create_article.html', errors=errors, title=title, text=text, category=category)
@@ -190,15 +194,19 @@ def edit_article(id):
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         text = request.form.get('text', '').strip()
-        category = request.form.get('category', 'general').strip()
+        category = request.form.get('category', '').strip()
+        new_category = request.form.get('new_category', '').strip()
         errors = {}
 
         if not title:
             errors['title'] = 'Обязательно введите заголовок'
         if not text:
             errors['text'] = 'Обязательно введите текст статьи'
-        if not category:
-            errors['category'] = 'Обязательно выберите категорию'
+        
+        if not category and not new_category:
+            errors['category'] = 'Обязательно выберите или введите категорию'
+        elif new_category:
+            category = new_category
 
         if errors:
             return render_template('edit_article.html', errors=errors, title=title, text=text, category=category, article=article)
