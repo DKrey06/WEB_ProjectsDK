@@ -40,27 +40,32 @@ def init_db():
                 {
                     'title': 'Первая новость',
                     'text': 'Текст первой новости',
-                    'category': 'Технологии'
+                    'category': 'Технологии',
+                    'days_ago': 5
                 },
                 {
-                    'title': 'Вторая новость',
+                    'title': 'Вторая новость', 
                     'text': 'Текст второй новости',
-                    'category': 'Медицина'
+                    'category': 'Медицина',
+                    'days_ago': 3
                 },
                 {
-                    'title': 'Третья новость', 
+                    'title': 'Третья новость',
                     'text': 'Текст третьей новости',
-                    'category': 'Общее'
+                    'category': 'Общее',
+                    'days_ago': 1
                 }
             ]
                 
             for article_data in articles_data:
+                article_date = datetime.now() - timedelta(days=article_data['days_ago'])
+                
                 article = Article(
                     title=article_data['title'],
                     text=article_data['text'],
                     category=article_data['category'],
                     author=test_user,
-                    created_date=datetime.now()
+                    created_date=article_date
                 )
                 db.session.add(article)
             
