@@ -3,6 +3,7 @@ import re
 from datetime import datetime, timedelta
 from models import db, User, Article, Comment
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///news_blog_DK.db'
@@ -11,6 +12,15 @@ app.config['SECRET_KEY'] = '123456'
 
 db.init_app(app)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Пожалуйста, войдите для доступа к странице.'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 def init_db():
     with app.app_context():
         db.create_all() 
@@ -18,7 +28,7 @@ def init_db():
         test_user = User.query.filter_by(email='mrdmitry2006@mail.ru').first()
         if not test_user:
             test_user = User(
-                name='Дмитрий Кретов', 
+                name='БОГ', 
                 email='mrdmitry2006@mail.ru',
                 hashed_password=generate_password_hash('123456')
             )
@@ -90,6 +100,102 @@ def inject_today():
 def inject_categories():
     categories = get_categories()
     return {'categories': categories}
+
+@app.context_processor
+def inject_current_user():
+    return {'current_user': current_user}
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
+        errors = {}
+
+        if not name:
+            errors['name'] = 'Обязательно введите имя'
+        elif len(name) < 2:
+            errors['name'] = 'Имя должно содержать минимум 2 символа'
+        
+        if not email:
+            errors['email'] = 'Обязательно введите email'
+        else:
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, email):
+                errors['email'] = 'Введите корректный email адрес'
+            elif User.query.filter_by(email=email).first():
+                errors['email'] = 'Пользователь с таким email уже существует'
+        
+        if not password:
+            errors['password'] = 'Обязательно введите пароль'
+        elif len(password) < 6:
+            errors['password'] = 'Пароль должен содержать минимум 6 символов'
+        
+        if not confirm_password:
+            errors['confirm_password'] = 'Обязательно подтвердите пароль'
+        elif password != confirm_password:
+            errors['confirm_password'] = 'Пароли не совпадают'
+        
+        if errors:
+            return render_template('register.html', errors=errors, name=name, email=email)
+        
+        user = User(
+            name=name,
+            email=email
+        )
+        user.set_password(password)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        login_user(user)
+        return redirect(url_for('index'))
+    
+    return render_template('register.html')
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        remember = bool(request.form.get('remember'))
+        errors = {}
+
+        if not email:
+            errors['email'] = 'Обязательно введите email'
+        if not password:
+            errors['password'] = 'Обязательно введите пароль'
+        
+        if errors:
+            return render_template('login.html', errors=errors, email=email)
+        
+        user = User.query.filter_by(email=email).first()
+        
+        if user and user.check_password(password):
+            login_user(user, remember=remember)
+            flash(f'Добро пожаловать, {user.name}!', 'success')
+            
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('index'))
+        else:
+            errors['login'] = 'Неверный email или пароль'
+            return render_template('login.html', errors=errors, email=email)
+    
+    return render_template('login.html')
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 @app.route("/")
 def index():
@@ -191,6 +297,7 @@ def add_comment(article_id):
     return redirect(url_for('news', id=article_id))
 
 @app.route('/create-article', methods=['POST', 'GET'])
+@login_required
 def create_article():
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
@@ -212,27 +319,27 @@ def create_article():
         if errors:
             return render_template('create_article.html', errors=errors, title=title, text=text, category=category)
 
-        author = User.query.first()
-        if not author:
-            return render_template('create_article.html', title=title, text=text, category=category)
-        
         article = Article(
             title=title,
             text=text,
             category=category,
-            author=author,
+            author=current_user,
             created_date=datetime.now()
         )
 
         db.session.add(article)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('news', id=article.id))
 
     return render_template('create_article.html')
 
 @app.route('/edit-article/<int:id>', methods=['POST', 'GET'])
+@login_required
 def edit_article(id):
     article = Article.query.get_or_404(id)
+    
+    if article.author != current_user:
+        return redirect(url_for('news', id=id))
     
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
@@ -264,8 +371,12 @@ def edit_article(id):
     return render_template('edit_article.html', article=article)
 
 @app.route('/delete-article/<int:id>', methods=['POST'])
+@login_required
 def delete_article(id):
     article = Article.query.get_or_404(id)
+    
+    if article.author != current_user:
+        return redirect(url_for('news', id=id))
     
     db.session.delete(article)
     db.session.commit()
