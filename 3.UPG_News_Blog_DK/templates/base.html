@@ -18,10 +18,16 @@
 	<div class="page">
 		<header
 			class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-			<div class="col-md-3 mb-2 mb-md-0">
-				<a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
-					<img class='header_img' src="{{url_for('static',filename='images/LogoCat.png')}}" alt="Logo_Cat">
-				</a>
+			<div class="d-flex align-items-center">
+				<div class="me-3">
+					<a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
+						<img class='header_img' src="{{url_for('static',filename='images/LogoCat.png')}}"
+							alt="Logo_Cat">
+					</a>
+				</div>
+				<div>
+					<h1 class="mb-0">NEWS_DK</h1>
+				</div>
 			</div>
 			<ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
 				<li><a href="{{url_for('index')}}" class="nav-link px-2">Главная</a></li>
@@ -30,9 +36,27 @@
 				<li><a href="{{url_for('feedback')}}" class="nav-link px-2">Обратная связь</a></li>
 				<li><a href="{{url_for('articles')}}" class="nav-link px-2">Все статьи</a></li>
 			</ul>
+
 			<div class="col-md-3 text-end">
-				<h1>NEWS_DK</h1>
+				{% if current_user.is_authenticated %}
+				<div class="dropdown">
+					<button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+						{{ current_user.name }}
+					</button>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="{{ url_for('create_article') }}">Создать статью</a></li>
+						<li>
+							<hr class="dropdown-divider">
+						</li>
+						<li><a class="dropdown-item" href="{{ url_for('logout') }}">Выйти</a></li>
+					</ul>
+				</div>
+				{% else %}
+				<a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2">Войти</a>
+				<a href="{{ url_for('register') }}" class="btn btn-primary">Регистрация</a>
+				{% endif %}
 			</div>
+
 		</header>
 		<div class="content">
 			{% block content %}{% endblock %}
