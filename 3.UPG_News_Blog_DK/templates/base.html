@@ -39,17 +39,10 @@
 
 			<div class="col-md-3 text-end">
 				{% if current_user.is_authenticated %}
-				<div class="dropdown">
-					<button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-						{{ current_user.name }}
-					</button>
-					<ul class="dropdown-menu">
-						<li><a class="dropdown-item" href="{{ url_for('create_article') }}">Создать статью</a></li>
-						<li>
-							<hr class="dropdown-divider">
-						</li>
-						<li><a class="dropdown-item" href="{{ url_for('logout') }}">Выйти</a></li>
-					</ul>
+				<div class="d-flex align-items-center gap-2">
+					<span class="text-muted">Привет, {{ current_user.name }}!</span>
+					<a href="{{ url_for('create_article') }}" class="btn btn-outline-success btn-sm">Создать статью</a>
+					<a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Выйти</a>
 				</div>
 				{% else %}
 				<a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2">Войти</a>
