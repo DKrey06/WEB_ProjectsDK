@@ -159,6 +159,7 @@ def register():
         db.session.commit()
         
         login_user(user)
+        flash(f'Регистрация прошла успешно! Добро пожаловать, {user.name}!', 'success')
         return redirect(url_for('index'))
     
     return render_template('register.html')
@@ -237,6 +238,7 @@ def feedback():
         if errors:
             return render_template('feedback.html', errors=errors, username=username, usermail=usermail, textmess=textmess)
         
+        flash('Сообщение успешно отправлено! Спасибо за обратную связь.', 'success')
         return render_template('post_feedback.html', errors=errors, username=username, usermail=usermail, textmess=textmess)
     else:
         return render_template('feedback.html')
@@ -334,6 +336,7 @@ def create_article():
 
         db.session.add(article)
         db.session.commit()
+        flash('Статья успешно создана!', 'success')
         return redirect(url_for('news', id=article.id))
 
     return render_template('create_article.html')
@@ -344,6 +347,7 @@ def edit_article(id):
     article = Article.query.get_or_404(id)
     
     if article.author != current_user:
+        flash('У вас нет прав для редактирования этой статьи!', 'danger')
         return redirect(url_for('news', id=id))
     
     if request.method == 'POST':
@@ -381,6 +385,7 @@ def delete_article(id):
     article = Article.query.get_or_404(id)
     
     if article.author != current_user:
+        flash('У вас нет прав для удаления этой статьи!', 'danger')
         return redirect(url_for('news', id=id))
     
     db.session.delete(article)
@@ -401,6 +406,7 @@ def articles_by_category(category):
     valid_categories = get_categories()
     
     if category not in valid_categories:
+        flash(f'Категория "{category}" не найдена!', 'danger')
         return redirect(url_for('articles'))
     
     articles = get_articles(category=category)
