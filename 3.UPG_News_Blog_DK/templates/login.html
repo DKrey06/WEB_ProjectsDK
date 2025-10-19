@@ -28,18 +28,18 @@
 						<div class="mb-3">
 							<label class="form-label">Email:</label>
 							<input class="form-control {% if errors and errors.email %}is-invalid{% endif %}"
-								type="email" name="email" maxlength="100" value="{{ email if email else '' }}" required>
+								type="email" name="email" maxlength="100" value="{{ email if email else '' }}">
 							{% if errors and errors.email %}
-							<div class="invalid-feedback">{{ errors.email }}</div>
+							<div class="invalid-feedback d-block">{{ errors.email }}</div>
 							{% endif %}
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Пароль:</label>
 							<input class="form-control {% if errors and errors.password %}is-invalid{% endif %}"
-								type="password" name="password" required>
+								type="password" name="password">
 							{% if errors and errors.password %}
-							<div class="invalid-feedback">{{ errors.password }}</div>
+							<div class="invalid-feedback d-block">{{ errors.password }}</div>
 							{% endif %}
 						</div>
 
