@@ -262,15 +262,13 @@ def news(id):
     return render_template('news_detail.html', article=article_data, comments=comments)
 
 @app.route('/add-comment/<int:article_id>', methods=['POST'])
+@login_required
 def add_comment(article_id):
     article = Article.query.get_or_404(article_id)
     
-    author_name = request.form.get('author_name', '').strip()
     comment_text = request.form.get('comment_text', '').strip()
     errors = {}
     
-    if not author_name:
-        errors['author_name'] = 'Обязательно введите имя'
     if not comment_text:
         errors['comment_text'] = 'Обязательно введите текст комментария'
     
@@ -289,11 +287,10 @@ def add_comment(article_id):
                              article=article_data, 
                              comments=comments,
                              errors=errors,
-                             author_name=author_name,
                              comment_text=comment_text)
     comment = Comment(
         text=comment_text,
-        author_name=author_name,
+        author_name=current_user.name,
         article_id=article_id,
         date=datetime.now()
     )

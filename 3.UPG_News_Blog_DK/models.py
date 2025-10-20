@@ -41,3 +41,4 @@ class Comment(db.Model):
     date = db.Column(db.DateTime, default=datetime.now)
     article_id = db.Column(db.Integer, db.ForeignKey('article.id'), nullable=False)
     author_name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)

@@ -51,23 +51,17 @@
 		<div class="comments-section mt-5">
 			<h4 class="mb-4">Комментарии ({{ comments|length }})</h4>
 
+			{% if current_user.is_authenticated %}
 			<div class="card mb-4">
 				<div class="card-body">
 					<h5 class="card-title">Добавить комментарий</h5>
+					<p class="text-muted small">Вы вошли как: <strong>{{ current_user.name }}</strong></p>
 					<form method="POST" action="{{ url_for('add_comment', article_id=article.id) }}">
-						<div class="mb-3">
-							<label class="form-label">Ваше имя:</label>
-							<input type="text"
-								class="form-control {% if errors and errors.author_name %}is-invalid{% endif %}"
-								name="author_name" maxlength="100" value="{{ author_name if author_name else '' }}">
-							{% if errors and errors.author_name %}
-							<div class="invalid-feedback d-block">{{ errors.author_name }}</div>
-							{% endif %}
-						</div>
 						<div class="mb-3">
 							<label class="form-label">Текст комментария:</label>
 							<textarea class="form-control {% if errors and errors.comment_text %}is-invalid{% endif %}"
-								name="comment_text" rows="4">{{ comment_text if comment_text else '' }}</textarea>
+								name="comment_text" rows="4"
+								placeholder="Введите ваш комментарий...">{{ comment_text if comment_text else '' }}</textarea>
 							{% if errors and errors.comment_text %}
 							<div class="invalid-feedback d-block">{{ errors.comment_text }}</div>
 							{% endif %}
@@ -76,6 +70,23 @@
 					</form>
 				</div>
 			</div>
+			{% else %}
+			<div class="card mb-4">
+				<div class="card-body text-center">
+					<h5 class="card-title">Хотите оставить комментарий?</h5>
+					<p class="text-muted">Войдите в систему, чтобы добавить комментарий к этой статье</p>
+					<div class="d-flex gap-2 justify-content-center">
+						<a href="{{ url_for('login', next=url_for('news', id=article.id)) }}" class="btn btn-primary">
+							Войти
+						</a>
+						<a href="{{ url_for('register', next=url_for('news', id=article.id)) }}"
+							class="btn btn-outline-primary">
+							Зарегистрироваться
+						</a>
+					</div>
+				</div>
+			</div>
+			{% endif %}
 
 			{% if comments %}
 			{% for comment in comments %}
