@@ -1,3 +1,4 @@
+from api import api_bp
 from flask import Flask, render_template, request, flash, url_for, redirect
 import re
 from datetime import datetime, timedelta
@@ -16,6 +17,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Пожалуйста, войдите для доступа к странице.'
+app.register_blueprint(api_bp)
 
 @login_manager.user_loader
 def load_user(user_id):
