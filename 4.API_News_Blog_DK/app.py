@@ -521,14 +521,38 @@ def api_update_article(id):
             'error': 'Нет данных в теле запроса'
         })
     
+    title = data.get('title', '').strip()
+    text = data.get('text', '').strip()
+    category = data.get('category', '').strip()
+    errors = {}
+
     if 'title' in data:
-        article.title = data['title'].strip()
-    
+        if not title:
+            errors['title'] = 'Заголовок не может быть пустым'
+        elif len(title) > 200:
+            errors['title'] = 'Заголовок не должен превышать 200 символов'
+        else:
+            article.title = title
+
     if 'text' in data:
-        article.text = data['text'].strip()
-    
+        if not text:
+            errors['text'] = 'Текст статьи не может быть пустым'
+        else:
+            article.text = text
+
     if 'category' in data:
-        article.category = data['category'].strip()
+        if not category:
+            errors['category'] = 'Категория не может быть пустой'
+        elif len(category) > 50:
+            errors['category'] = 'Категория не должна превышать 50 символов'
+        else:
+            article.category = category
+
+    if errors:
+        return jsonify({
+            'success': False,
+            'errors': errors
+        })
     
     article.created_date = datetime.now()
     
@@ -539,7 +563,6 @@ def api_update_article(id):
         'message': 'Статья успешно обновлена',
         'article': article.to_dict()
     })
-
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
