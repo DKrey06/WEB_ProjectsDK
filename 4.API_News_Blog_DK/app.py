@@ -563,6 +563,32 @@ def api_update_article(id):
         'message': 'Статья успешно обновлена',
         'article': article.to_dict()
     })
+
+@app.route("/api/articles/<int:id>", methods=['DELETE'])
+@login_required
+def api_delete_article(id):
+    article = Article.query.get(id)
+
+    if not article:
+        return jsonify({
+            'success': False,
+            'error': 'Статья не найдена'
+        })
+    
+    if article.author != current_user:
+        return jsonify({
+            'success': False,
+            'error': 'У вас нет прав для удаления этой статьи'
+        })
+    
+    db.session.delete(article)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'massage': 'Статья успешно удалена'
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
