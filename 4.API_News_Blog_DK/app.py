@@ -589,6 +589,31 @@ def api_delete_article(id):
         'massage': 'Статья успешно удалена'
     })
 
+#API по категориям
+@app.route("/api/articles/category/<string:category>", methods=['GET'])
+def api_articles_by_category(category):
+    articles = Article.query.filter_by(category=category).order_by(Article.created_date.desc()).all
+
+    articles_data=[]
+    for article in articles:
+        articles_data.append(article.to_dict())
+
+    if not articles:
+        return jsonify({
+            'success': True,
+            'count': 0,
+            'category': category,
+            'message': f'В категории "{category}" пока нет статей',
+            'articles': articles_data
+        })
+        
+    return jsonify({
+        'success': True,
+        'count': len(articles_data),
+        'category': category,
+        'articles': articles_data
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
