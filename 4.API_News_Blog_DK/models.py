@@ -20,6 +20,14 @@ class User(db.Model, UserMixin):
     
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'created_date': self.created_date.isoformat()
+        }
 
 class Article(db.Model):
     __tablename__ = 'article'
@@ -32,6 +40,16 @@ class Article(db.Model):
     category = db.Column(db.String(50), nullable=False, default='general')
 
     comments = db.relationship('Comment', backref='article', lazy=True, cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'text': self.text,
+            'created_date': self.created_date.isoformat(),
+            'author': self.author.name,
+            'category': self.category,
+        }
 
 class Comment(db.Model):
     __tablename__ = 'comment'

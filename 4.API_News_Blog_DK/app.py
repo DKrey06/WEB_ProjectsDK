@@ -1,10 +1,10 @@
-from api import api_bp
 from flask import Flask, render_template, request, flash, url_for, redirect
 import re
 from datetime import datetime, timedelta
 from models import db, User, Article, Comment
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask import jsonify
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///news_blog_DK.db'
@@ -17,7 +17,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Пожалуйста, войдите для доступа к странице.'
-app.register_blueprint(api_bp)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -411,6 +410,38 @@ def articles_by_category(category):
     articles = get_articles(category=category)
     return render_template('articles.html', articles=articles, current_category=category)
 
+#Базовые эндпоинты
+@app.route("/api/articles", methods=['GET'])
+def api_articles():
+    articles = Article.query.order_by(Article.created_date.desc()).all()
+        
+    articles_data = []
+    for article in articles:
+        articles_data.append(article.to_dict())
+    
+    if not articles:
+        return jsonify({
+                'success': False,
+                'error': 'Статьи не найдены'
+            }), 404
+        
+    return jsonify({
+        'count': len(articles_data),
+        'articles': articles_data
+        })
+@app.route("/api/articles/<int:id>", methods=['GET'])
+def api_articles_detail(id):
+    article = Article.query.get(id)
+    if not article:
+            return jsonify({
+                'success': False,
+                'error': 'Статья не найдена'
+            }), 404
+        
+    return jsonify({
+        'success': True,
+        'article': article.to_dict()
+    })
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
