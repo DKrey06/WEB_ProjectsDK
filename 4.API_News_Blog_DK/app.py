@@ -496,6 +496,50 @@ def api_create_article():
         'article': article.to_dict()
     })
 
+@app.route("/api/articles/<int:id>", methods=['PUT'])
+@login_required
+def api_update_article(id):
+    article = Article.query.get(id)
+
+    if not article:
+        return jsonify({
+            'success': False,
+            'error': 'Статья не найдена'
+        })
+    
+    if article.author != current_user:
+        return jsonify({
+            'success': False,
+            'error': 'У вас нет прав для редактирования этой статьи'
+        })
+    
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            'success': False,
+            'error': 'Нет данных в теле запроса'
+        })
+    
+    if 'title' in data:
+        article.title = data['title'].strip()
+    
+    if 'text' in data:
+        article.text = data['text'].strip()
+    
+    if 'category' in data:
+        article.category = data['category'].strip()
+    
+    article.created_date = datetime.now()
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Статья успешно обновлена',
+        'article': article.to_dict()
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
