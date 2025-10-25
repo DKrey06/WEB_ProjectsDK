@@ -592,7 +592,7 @@ def api_delete_article(id):
 #API по категориям
 @app.route("/api/articles/category/<string:category>", methods=['GET'])
 def api_articles_by_category(category):
-    articles = Article.query.filter_by(category=category).order_by(Article.created_date.desc()).all
+    articles = Article.query.filter_by(category=category).order_by(Article.created_date.desc()).all()
 
     articles_data=[]
     for article in articles:
@@ -611,6 +611,33 @@ def api_articles_by_category(category):
         'success': True,
         'count': len(articles_data),
         'category': category,
+        'articles': articles_data
+    })
+
+#Сортировка по дате 
+@app.route("/api/articles/sort/<string:sort_type>", methods=['GET'])
+def api_articles_sorted(sort_type):
+    if sort_type == 'date':
+        articles = Article.query.order_by(Article.created_date.desc()).all()
+        sort_description = "по дате (сначала новые)"
+    elif sort_type == 'date_asc':
+        articles = Article.query.order_by(Article.created_date.asc()).all()
+        sort_description = "по дате (сначала старые)"
+    else:
+        return jsonify({
+            'success': False,
+            'error': 'Невертый тип сортировки. Доступны date, date_asc'
+        })
+    
+    articles_data = []
+    for article in articles:
+        articles_data.append(article.to_dict())
+    
+    return jsonify({
+        'success': True,
+        'count': len(articles_data),
+        'sort_type': sort_type,
+        'sort_description': sort_description,
         'articles': articles_data
     })
 
