@@ -426,6 +426,7 @@ def api_articles():
             }), 404
         
     return jsonify({
+        'success': True,
         'count': len(articles_data),
         'articles': articles_data
         })
@@ -442,6 +443,59 @@ def api_articles_detail(id):
         'success': True,
         'article': article.to_dict()
     })
+
+#CRUD API
+@app.route("/api/articles", methods=['POST'])
+@login_required
+def api_create_article():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            'success': False,
+            'error': 'Нет данных в теле запроса'
+        })
+    
+    title = data.get('title','').strip()
+    text = data.get('text','').strip()
+    category = data.get('category','').strip()
+
+    errors={}
+
+    if not title:
+        errors['title']='Обязательно введите заголовок'
+    elif len(title) > 200:
+        errors['title'] = 'Заголовок не должен превышать 200 символов'
+    if not text:
+        errors['text']='Обязательно введите текст статьи'
+    if not category:
+        errors['category']='Обязательно укажите категорию'
+    elif len(category) > 50:
+        errors['category'] = 'Категория не должна превышать 50 символов'
+
+    if errors:
+        return jsonify({
+            'success': False,
+            'errors': errors
+        })
+    
+    article = Article(
+        title=title,
+        text=text,
+        category=category,
+        author=current_user,
+        created_date=datetime.now()
+        )
+        
+    db.session.add(article)
+    db.session.commit()
+        
+    return jsonify({
+        'success': True,
+        'message': 'Статья успешно создана',
+        'article': article.to_dict()
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
