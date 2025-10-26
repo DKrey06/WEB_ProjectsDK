@@ -60,3 +60,14 @@ class Comment(db.Model):
     article_id = db.Column(db.Integer, db.ForeignKey('article.id'), nullable=False)
     author_name = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'text': self.text,
+            'date': self.date.isoformat(),
+            'author_name': self.author_name,
+            'article_id': self.article_id,
+            'article_title': self.article.title,
+            'user_id': self.user_id
+        }

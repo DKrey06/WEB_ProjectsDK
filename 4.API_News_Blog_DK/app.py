@@ -641,6 +641,28 @@ def api_articles_sorted(sort_type):
         'articles': articles_data
     })
 
+@app.route("/api/comment", methods=['GET'])
+def api_comments():
+    comments = Comment.query.order_by(Comment.date.desc()).all()
+    
+    comments_data = []
+    for comment in comments:
+        comments_data.append(comment.to_dict())
+    
+    if not comments:
+        return jsonify({
+            'success': True,
+            'count': 0,
+            'message': 'Комментарии не найдены',
+            'comments': comments_data
+        })
+    
+    return jsonify({
+        'success': True,
+        'count': len(comments_data),
+        'comments': comments_data
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
