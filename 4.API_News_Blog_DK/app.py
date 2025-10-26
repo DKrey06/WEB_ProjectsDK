@@ -678,6 +678,7 @@ def api_comment_detail(id):
         'comment': comment.to_dict()
     })
 
+#CRUD API комментарии
 @app.route("/api/comment", methods=['POST'])
 @login_required
 def api_create_comment():
@@ -725,6 +726,59 @@ def api_create_comment():
     return jsonify({
         'success': True,
         'message': 'Комментарий создан',
+        'comment': comment.to_dict()
+    })
+
+@app.route("/api/comment/<int:id>", methods=['PUT'])
+@login_required
+def api_update_comment(id):
+    comment = Comment.query.get(id)
+    if not comment:
+        return jsonify({
+            'success': False,
+            'error': 'Комментарий не найден'
+        })
+
+    if comment.user_id != current_user.id:
+        return jsonify({
+            'success': False,
+            'error': 'У вас нет прав для редактирования этого комментария'
+        })
+
+    data = request.get_json()
+    if not data:
+        return jsonify({
+            'success': False,
+            'error': 'Нет данных в теле запроса'
+        })
+
+    text = data.get('text', '').strip()
+    errors = {}
+
+    if 'text' in data:
+        if not text:
+            errors['text'] = 'Текст комментария не может быть пустым'
+        elif len(text) > 1000:
+            errors['text'] = 'Текст комментария не должен превышать 1000 символов'
+        else:
+            comment.text = text
+
+    if 'text' not in data:
+        errors['text'] = 'Поле text обязательно для обновления'
+
+    if errors:
+        return jsonify({
+            'success': False,
+            'errors': errors
+        })
+
+    comment.date = datetime.now()
+    
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': 'Комментарий обновлен',
         'comment': comment.to_dict()
     })
 
