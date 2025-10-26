@@ -641,6 +641,7 @@ def api_articles_sorted(sort_type):
         'articles': articles_data
     })
 
+#API комментарии
 @app.route("/api/comment", methods=['GET'])
 def api_comments():
     comments = Comment.query.order_by(Comment.date.desc()).all()
@@ -662,6 +663,21 @@ def api_comments():
         'count': len(comments_data),
         'comments': comments_data
     })
+
+@app.route("/api/comment/<int:id>", methods=['GET'])
+def api_comment_detail(id):
+    comment = Comment.query.get(id)
+    if not comment:
+        return jsonify({
+            'success': False,
+            'error':'Комментарий не найден'
+        })
+    
+    return jsonify({
+        'success': True,
+        'comment': comment.to_dict()
+    })
+
 
 if __name__ == '__main__':
     init_db()
