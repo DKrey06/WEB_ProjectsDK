@@ -678,6 +678,55 @@ def api_comment_detail(id):
         'comment': comment.to_dict()
     })
 
+@app.route("/api/comment", methods=['POST'])
+@login_required
+def api_create_comment():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            'success': False,
+            'error': 'Нет данных в теле запроса'
+        })
+
+    text = data.get('text', '').strip()
+    article_id = data.get('article_id')
+    errors = {}
+
+    if not text:
+        errors['text'] = 'Обязательно введите текст комментария'
+    elif len(text) > 1000:
+        errors['text'] = 'Текст комментария не должен превышать 1000 символов'
+
+    if not article_id:
+        errors['article_id'] = 'Обязательно укажите ID статьи'
+    else:
+        article = Article.query.get(article_id)
+        if not article:
+            errors['article_id'] = 'Статья с указанным ID не найдена'
+
+    if errors:
+        return jsonify({
+            'success': False,
+            'errors': errors
+        })
+    
+    comment = Comment(
+        text=text,
+        article_id=article_id,
+        author_name=current_user.name,
+        user_id=current_user.id,
+        date=datetime.now()
+    )
+    
+    db.session.add(comment)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': 'Комментарий создан',
+        'comment': comment.to_dict()
+    })
 
 if __name__ == '__main__':
     init_db()
