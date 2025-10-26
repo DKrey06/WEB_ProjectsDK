@@ -782,6 +782,30 @@ def api_update_comment(id):
         'comment': comment.to_dict()
     })
 
+@app.route("/api/comment/<int:id>", methods=['DELETE'])
+@login_required
+def api_delete_comment(id):
+    comment = Comment.query.get(id)
+    if not comment:
+        return jsonify({
+            'success': False,
+            'error': 'Комментарий не найден'
+        })
+    
+    if comment.user_id != current_user.id:
+        return jsonify({
+            'success': False,
+            'error': 'У вас нет прав для удаления этого комментария'
+        })
+
+    db.session.delete(comment)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': 'Комментарий удален'
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
