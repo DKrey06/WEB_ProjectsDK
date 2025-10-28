@@ -446,8 +446,12 @@ def api_articles_detail(id):
 
 #CRUD API
 @app.route("/api/articles", methods=['POST'])
-@login_required
 def api_create_article():
+    if not current_user.is_authenticated:
+        return jsonify({
+            'success': False,
+            'error': 'Требуется авторизация'
+        })
     data = request.get_json()
 
     if not data:
@@ -497,8 +501,13 @@ def api_create_article():
     })
 
 @app.route("/api/articles/<int:id>", methods=['PUT'])
-@login_required
 def api_update_article(id):
+    if not current_user.is_authenticated:
+        return jsonify({
+            'success': False,
+            'error': 'Требуется авторизация'
+        })
+    
     article = Article.query.get(id)
 
     if not article:
@@ -565,8 +574,13 @@ def api_update_article(id):
     })
 
 @app.route("/api/articles/<int:id>", methods=['DELETE'])
-@login_required
 def api_delete_article(id):
+    if not current_user.is_authenticated:
+        return jsonify({
+            'success': False,
+            'error': 'Требуется авторизация'
+        })
+    
     article = Article.query.get(id)
 
     if not article:
@@ -680,8 +694,13 @@ def api_comment_detail(id):
 
 #CRUD API комментарии
 @app.route("/api/comment", methods=['POST'])
-@login_required
 def api_create_comment():
+    if not current_user.is_authenticated:
+        return jsonify({
+            'success': False,
+            'error': 'Требуется авторизация'
+        })
+    
     data = request.get_json()
 
     if not data:
@@ -730,8 +749,13 @@ def api_create_comment():
     })
 
 @app.route("/api/comment/<int:id>", methods=['PUT'])
-@login_required
 def api_update_comment(id):
+    if not current_user.is_authenticated:
+        return jsonify({
+            'success': False,
+            'error': 'Требуется авторизация'
+        })
+    
     comment = Comment.query.get(id)
     if not comment:
         return jsonify({
@@ -783,8 +807,13 @@ def api_update_comment(id):
     })
 
 @app.route("/api/comment/<int:id>", methods=['DELETE'])
-@login_required
 def api_delete_comment(id):
+    if not current_user.is_authenticated:
+        return jsonify({
+            'success': False,
+            'error': 'Требуется авторизация'
+        })
+    
     comment = Comment.query.get(id)
     if not comment:
         return jsonify({
