@@ -1,0 +1,25 @@
+.news-detail {
+	max-width: 800px;
+	margin: 0 auto;
+	overflow-x: hidden;
+	position: relative;
+	z-index: 1;
+}
+
+.new-badge {
+	font-size: 13px;
+	font-weight: 600;
+	padding: 6px 13px;
+	border: 1px solid #198754;
+}
+
+.article-content {
+	font-size: 18px;
+	line-height: 1.7;
+	color: #333;
+}
+
+.lead {
+	font-size: 18px;
+	font-weight: 400;
+}
