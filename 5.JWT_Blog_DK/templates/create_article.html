@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Создание статьи
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<h1>Создание новой статьи</h1>
+	<p>Заполните форму для создания статьи</p>
+
+	{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+	{% for category, message in messages %}
+	<div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+		role="alert">
+		{{ message }}
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+	{% endfor %}
+	{% endif %}
+	{% endwith %}
+
+	<form name="create_article" method="POST">
+		<div class="form-list">
+			<div class="mb-3">
+				<label class="form-label">Заголовок статьи:</label>
+				<input class="form-control {% if errors and errors.title %}is-invalid{% endif %}" type="text"
+					name="title" maxlength="200" value="{{ title if title else '' }}">
+				{% if errors and errors.title %}
+				<div class="invalid-feedback d-block">{{ errors.title }}</div>
+				{% endif %}
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label">Категория:</label>
+				<select class="form-control {% if errors and errors.category %}is-invalid{% endif %}" name="category">
+					<option value="">Выберите категорию</option>
+					<option value="Технологии" {% if category=='Технологии' %}selected{% endif %}>Технологии</option>
+					<option value="Медицина" {% if category=='Медицина' %}selected{% endif %}>Медицина</option>
+					<option value="Общее" {% if category=='Общее' %}selected{% endif %}>Общее</option>
+					<option value="Наука" {% if category=='Наука' %}selected{% endif %}>Наука</option>
+					<option value="Спорт" {% if category=='Спорт' %}selected{% endif %}>Спорт</option>
+				</select>
+				{% if errors and errors.category %}
+				<div class="invalid-feedback d-block">{{ errors.category }}</div>
+				{% endif %}
+				<div class="form-text">
+					Или введите новую категорию:
+					<input type="text" class="form-control mt-1" name="new_category" placeholder="Новая категория">
+				</div>
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label">Текст статьи:</label>
+				<textarea class="form-control {% if errors and errors.text %}is-invalid{% endif %}" name="text"
+					rows="10">{{ text if text else '' }}</textarea>
+				{% if errors and errors.text %}
+				<div class="invalid-feedback d-block">{{ errors.text }}</div>
+				{% endif %}
+			</div>
+			<div class="mb-3">
+				<button type="submit" class="btn btn-primary">Создать статью</button>
+				<a href="{{ url_for('index') }}" class="btn btn-secondary">Отмена</a>
+			</div>
+		</div>
+	</form>
+</div>
+{% endblock %}
