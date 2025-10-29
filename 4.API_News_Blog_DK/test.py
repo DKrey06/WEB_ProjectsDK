@@ -44,12 +44,12 @@
     
 
 # update_data = {
-#     "title": "ОТРЕДАКТИРОВАННАЯ статья через API c 1 id",
+#     "title": "ОТРЕДАКТИРОВАННАЯ статья через API c 4 id",
 #     "text": "Этот текст был полностью изменен через API запрос",
 #     "category": "Обновленная категория"
 # }
 
-# article_id = 1 
+# article_id = 4
 # response = session.put(
 #     f"http://127.0.0.1:5000/api/articles/{article_id}",
 #     json=update_data
@@ -77,7 +77,7 @@
 # if articles_response.status_code == 200:
 #     articles = articles_response.json()
 
-# article_id = 1
+# article_id = 4
 # response = session.delete(
 #     f"http://127.0.0.1:5000/api/articles/{article_id}"
 # )
@@ -109,7 +109,7 @@
 
 # comment_data = {
 #     "text": "Этот комментарий был создан с API",
-#     "article_id": 2
+#     "article_id": 1
 # }
 
 # response = session.post(
@@ -145,7 +145,7 @@
 #     "text": "Этот комментарий был ОТРЕДАКТИРОВАН с API"
 # }
 
-# comment_id = 7
+# comment_id = 1
 # response = session.put(
 #     f"http://127.0.0.1:5000/api/comment/{comment_id}",
 #     json=update_comment_data
@@ -177,7 +177,7 @@
 #         print(f"  ID: {comment['id']} - '{comment['text'][:50]}...' (Статья ID: {comment['article_id']}, Автор: {comment['author_name']})")
 
 
-# comment_id = 7
+# comment_id = 1
 # response = session.delete(
 #     f"http://127.0.0.1:5000/api/comment/{comment_id}"
 # )
@@ -190,4 +190,7 @@
 # import requests
 
 # res = requests.get("http://127.0.0.1:5000/api/articles/sort/date")
-# print(res.json())   
+# print(res.json())  
+# 
+# http://127.0.0.1:5000/api/articles/category/Технологии
+#  
