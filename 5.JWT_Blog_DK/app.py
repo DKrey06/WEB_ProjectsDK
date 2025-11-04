@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = '123456'
 
 app.config['JWT_SECRET_KEY'] = 'jwt-secret-key-123456'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=5)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 
 db.init_app(app)
@@ -99,6 +99,50 @@ def api_refresh():
             'email': user.email
         }
     }), 200
+
+@app.route("/api/auth/verify", methods=['POST'])
+@jwt_required()
+def api_verify_token():
+    current_user_id = get_jwt_identity()
+    
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({
+            'success': False,
+            'error': 'Пользователь не найден'
+        }), 401
+    
+    return jsonify({
+        'success': True,
+        'message': 'Токен действителен',
+        'user': user.to_dict()
+    }), 200
+
+#Ошибки токенов
+@jwt.unauthorized_loader
+def handle_unauthorized_error(reason):
+    return jsonify({
+        'success': False,
+        'error': 'Токен отсутствует или неверный формат',
+        'details': reason
+    }), 401
+
+@jwt.invalid_token_loader
+def handle_invalid_token_error(reason):
+    return jsonify({
+        'success': False,
+        'error': 'Неверный токен',
+        'details': reason
+    }), 422
+
+@jwt.expired_token_loader
+def handle_expired_token_error(expired_token):
+    token_type = expired_token['type']
+    return jsonify({
+        'success': False,
+        'error': f'{token_type} токен просрочен',
+        'details': 'Используйте refresh токен для получения нового access токена' if token_type == 'access' else 'Необходима повторная авторизация'
+    }), 401
 
 def init_db():
     with app.app_context():
