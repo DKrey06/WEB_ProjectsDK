@@ -1,15 +1,19 @@
-from flask import Flask, render_template, request, flash, url_for, redirect
+from flask import Flask, render_template, request, flash, url_for, redirect, jsonify
 import re
 from datetime import datetime, timedelta
 from models import db, User, Article, Comment
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask import jsonify
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///news_blog_DK.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = '123456'
+
+app.config['JWT_SECRET_KEY'] = 'jwt-secret-key-123456'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 
 db.init_app(app)
 
@@ -18,9 +22,78 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Пожалуйста, войдите для доступа к странице.'
 
+jwt = JWTManager(app)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# Эндпоинты JWT
+@app.route("/api/auth/login", methods=['POST'])
+def api_login():
+    data = request.get_json()
+    if not data:
+        return jsonify({
+            'success': False,
+            'error': 'Нет данных в теле запроса'
+        })
+    
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
+    
+    if not email or not password:
+        return jsonify({
+            'success': False,
+            'error': 'Email и пароль обязательны'
+        })
+    
+    user = User.query.filter_by(email=email).first()
+    
+    if user and user.check_password(password):
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Успешная авторизация',
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'user': {
+                'id': user.id,
+                'name': user.name,
+                'email': user.email
+            }
+        }), 200
+    else:
+        return jsonify({
+            'success': False,
+            'error': 'Неверный email или пароль'
+        }), 401
+
+@app.route("/api/auth/refresh", methods=['POST'])
+@jwt_required(refresh=True)
+def api_refresh():
+    current_user_id = get_jwt_identity()
+    
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({
+            'success': False,
+            'error': 'Пользователь не найден'
+        })
+    
+    new_access_token = create_access_token(identity=current_user_id)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Access токен обновлен',
+        'access_token': new_access_token,
+        'user': {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email
+        }
+    }), 200
 
 def init_db():
     with app.app_context():

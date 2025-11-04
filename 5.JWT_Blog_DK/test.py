@@ -1,193 +1,53 @@
-# #СОЗДАНИЕ СТАТЬИ
+import requests
+import json
 
-# import requests
-# session = requests.Session()
-# login_data = {
-#     'email': 'mrdmitry2006@mail.ru',
-#     'password': '123456'
-# }
-# login_response = session.post('http://127.0.0.1:5000/login', data=login_data)
-# print(f"Авторизация: {login_response.status_code}")
+BASE_URL = "http://127.0.0.1:5000"
 
-# create_data = {
-#     "title": "Статья через API",
-#     "text": "Тестовая статья через API",
-#     "category": "Технологии"
-# }
+def test_jwt_auth():
+    print("=== Тестирование JWT авторизации ===\n")
 
-# response = session.post(
-#     "http://127.0.0.1:5000/api/articles",
-#     json=create_data
-# )
-
-# print("Результат создания статьи:")
-# print(f"Статус: {response.status_code}")
-# print(f"Ответ: {response.json()}")
-
-
-# # РЕДАКТИРОВАНИЕ СТАТЬИ
-
-# import requests
-
-# session = requests.Session()
-
-# login_data = {
-#     'email': 'mrdmitry2006@mail.ru',
-#     'password': '123456'
-# }
-# login_response = session.post('http://127.0.0.1:5000/login', data=login_data)
-# print(f"Авторизация: {login_response.status_code}")
-
-# articles_response = session.get("http://127.0.0.1:5000/api/articles")
-# if articles_response.status_code == 200:
-#     articles = articles_response.json()
+    print("1. Получение токенов...")
+    login_data = {
+        'email': 'mrdmitry2006@mail.ru',
+        'password': '123456'
+    }
     
+    response = requests.post(f"{BASE_URL}/api/auth/login", json=login_data)
+    print(f"Статус: {response.status_code}")
+    print(f"Ответ: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
+    
+    if response.status_code == 200:
+        tokens = response.json()
+        access_token = tokens['access_token']
+        refresh_token = tokens['refresh_token']
+        
+        print(f"\nAccess Token: {access_token[:50]}...")
+        print(f"Refresh Token: {refresh_token[:50]}...")
+        
+        print("\n2. Обновление access токена...")
+        headers = {
+            'Authorization': f'Bearer {refresh_token}'
+        }
+        
+        refresh_response = requests.post(f"{BASE_URL}/api/auth/refresh", headers=headers)
+        print(f"Статус: {refresh_response.status_code}")
+        print(f"Ответ: {json.dumps(refresh_response.json(), indent=2, ensure_ascii=False)}")
+        
+        if refresh_response.status_code == 200:
+            new_tokens = refresh_response.json()
+            new_access_token = new_tokens['access_token']
+            print(f"\nНовый Access Token: {new_access_token[:50]}...")
+            
+            print("\n3. Тестируем доступ к защищенному API...")
+            protected_headers = {
+                'Authorization': f'Bearer {new_access_token}'
+            }
+            
+            articles_response = requests.get(f"{BASE_URL}/api/articles", headers=protected_headers)
+            print(f"Статус получения статей: {articles_response.status_code}")
+            
+    else:
+        print("Ошибка авторизации!")
 
-# update_data = {
-#     "title": "ОТРЕДАКТИРОВАННАЯ статья через API c 1 id",
-#     "text": "Этот текст был полностью изменен через API запрос",
-#     "category": "Обновленная категория"
-# }
-
-# article_id = 1 
-# response = session.put(
-#     f"http://127.0.0.1:5000/api/articles/{article_id}",
-#     json=update_data
-# )
-
-# print(f"\nРезультат редактирования статьи ID {article_id}:")
-# print(f"Статус: {response.status_code}")
-# result = response.json()
-# print(f"Ответ: {result}")
-
-# #УДАЛЕНИЕ СТАТЬИ
-
-# import requests
-
-# session = requests.Session()
-
-# login_data = {
-#     'email': 'mrdmitry2006@mail.ru',
-#     'password': '123456'
-# }
-# login_response = session.post('http://127.0.0.1:5000/login', data=login_data)
-# print(f"Авторизация: {login_response.status_code}")
-
-# articles_response = session.get("http://127.0.0.1:5000/api/articles")
-# if articles_response.status_code == 200:
-#     articles = articles_response.json()
-
-# article_id = 1
-# response = session.delete(
-#     f"http://127.0.0.1:5000/api/articles/{article_id}"
-# )
-
-# print(f"\nРезультат удаления статьи ID {article_id}:")
-# print(f"Статус: {response.status_code}")
-# result = response.json()
-# print(f"Ответ: {result}")
-
-# #СОЗДАНИЕ КОММЕНТАРИЯ
-
-# import requests
-
-# session = requests.Session()
-
-# login_data = {
-#     'email': 'mrdmitry2006@mail.ru',
-#     'password': '123456'
-# }
-# login_response = session.post('http://127.0.0.1:5000/login', data=login_data)
-# print(f"Авторизация: {login_response.status_code}")
-
-# articles_response = session.get("http://127.0.0.1:5000/api/articles")
-# if articles_response.status_code == 200:
-#     articles = articles_response.json()
-#     print("Доступные статьи:")
-#     for article in articles['articles']:
-#         print(f"  ID: {article['id']} - '{article['title']}'")
-
-# comment_data = {
-#     "text": "Этот комментарий был создан с API",
-#     "article_id": 2
-# }
-
-# response = session.post(
-#     "http://127.0.0.1:5000/api/comment",
-#     json=comment_data
-# )
-
-# print("\nРезультат создания комментария:")
-# print(f"Статус: {response.status_code}")
-# print(f"Ответ: {response.json()}")
-
-# #РЕДАКТИРОВАНИЕ КОММЕНТА
-
-# import requests
-
-# session = requests.Session()
-
-# login_data = {
-#     'email': 'mrdmitry2006@mail.ru',
-#     'password': '123456'
-# }
-# login_response = session.post('http://127.0.0.1:5000/login', data=login_data)
-# print(f"Авторизация: {login_response.status_code}")
-
-# comments_response = session.get("http://127.0.0.1:5000/api/comment")
-# if comments_response.status_code == 200:
-#     comments = comments_response.json()
-#     print("Доступные комментарии:")
-#     for comment in comments['comments']:
-#         print(f"  ID: {comment['id']} - '{comment['text'][:50]}...' (Статья ID: {comment['article_id']})")
-
-# update_comment_data = {
-#     "text": "Этот комментарий был ОТРЕДАКТИРОВАН с API"
-# }
-
-# comment_id = 7
-# response = session.put(
-#     f"http://127.0.0.1:5000/api/comment/{comment_id}",
-#     json=update_comment_data
-# )
-
-# print(f"\nРезультат редактирования комментария ID {comment_id}:")
-# print(f"Статус: {response.status_code}")
-# print(f"Ответ: {response.json()}")
-# print(f"Текст ответа: {response.text[:200]}")
-
-# #УДАЛЕНИЕ КОММЕНТА
-# import requests
-
-# session = requests.Session()
-
-# login_data = {
-#     'email': 'mrdmitry2006@mail.ru',
-#     'password': '123456'
-# }
-# login_response = session.post('http://127.0.0.1:5000/login', data=login_data)
-# print(f"Авторизация: {login_response.status_code}")
-
-
-# comments_response = session.get("http://127.0.0.1:5000/api/comment")
-# if comments_response.status_code == 200:
-#     comments = comments_response.json()
-#     print("Доступные комментарии:")
-#     for comment in comments['comments']:
-#         print(f"  ID: {comment['id']} - '{comment['text'][:50]}...' (Статья ID: {comment['article_id']}, Автор: {comment['author_name']})")
-
-
-# comment_id = 7
-# response = session.delete(
-#     f"http://127.0.0.1:5000/api/comment/{comment_id}"
-# )
-
-# print(f"\n Результат удаления комментария ID {comment_id}:")
-# print(f"Статус: {response.status_code}")
-# print(f"Ответ: {response.json()}")
-
-# #GET 
-# import requests
-
-# res = requests.get("http://127.0.0.1:5000/api/articles/sort/date")
-# print(res.json())   
+if __name__ == "__main__":
+    test_jwt_auth()
