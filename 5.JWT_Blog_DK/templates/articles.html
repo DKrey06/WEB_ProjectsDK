@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Список всех статей
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row align-items-center mb-4">
+		<div class="col">
+			<h2 class="mb-0">
+				{% if current_category %}
+				Статьи в категории: "{{ current_category }}"
+				{% else %}
+				Все статьи
+				{% endif %}
+			</h2>
+			<p class="text-muted">Полный список статей в нашем блоге</p>
+		</div>
+	</div>
+
+	<div class="card mb-4">
+		<div class="card-body">
+			<h5 class="card-title">Фильтр по категориям</h5>
+
+			<div class="categories-nav mb-3">
+				<h6>Быстрый переход:</h6>
+				<div class="d-flex flex-wrap gap-2">
+					<a href="{{ url_for('articles') }}"
+						class="btn {% if not current_category %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+						Все категории
+					</a>
+					{% for cat in categories %}
+					<a href="{{ url_for('articles_by_category', category=cat) }}"
+						class="btn {% if current_category == cat %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+						{{ cat }}
+					</a>
+					{% endfor %}
+				</div>
+			</div>
+
+			<form method="GET" action="{{ url_for('articles') }}" class="row g-3">
+				<div class="col-md-8">
+					<label for="category_search" class="form-label">Найти категорию:</label>
+					<input type="text" class="form-control" id="category_search" name="category"
+						value="{{ current_category if current_category else '' }}"
+						placeholder="Введите название категории...">
+					<div class="form-text">
+						Доступные категории:
+						{% for cat in categories %}
+						<span class="badge bg-secondary me-1">{{ cat }}</span>
+						{% endfor %}
+					</div>
+				</div>
+				<div class="col-md-4 d-flex align-items-end">
+					<div class="btn-group w-100">
+						<button type="submit" class="btn btn-primary">Найти</button>
+						{% if current_category %}
+						<a href="{{ url_for('articles') }}" class="btn btn-outline-danger" title="Сбросить фильтр">
+							Х
+						</a>
+						{% endif %}
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	{% if articles %}
+	<div class="row">
+		{% for article in articles %}
+		<div class="col-12 mb-4">
+			<div class="card news-card h-100 shadow-sm">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-start mb-2">
+						<h5 class="card-title mb-0">{{ article.title }}</h5>
+						{% if article.date.date() == today %}
+						<span class="badge bg-success ms-2 new-badge">НОВОЕ</span>
+						{% endif %}
+					</div>
+
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<p class="card-text text-muted small mb-0">
+							<i class="bi bi-calendar3"></i> {{ article.date.strftime('%d.%m.%Y в %H:%M') }}
+						</p>
+						<div>
+							{% if article.author %}
+							<span class="card-text text-muted small me-3">
+								Автор: {{ article.author }}
+							</span>
+							{% endif %}
+							<span class="badge bg-info">{{ article.category }}</span>
+						</div>
+					</div>
+
+					<p class="card-text mb-3">{{ article.preview }}</p>
+
+					<div class="row align-items-center">
+						<div class="col-md-6">
+							<a href="{{ url_for('news', id=article.id) }}" class="btn btn-primary btn-sm">
+								Читать полностью →
+							</a>
+						</div>
+						<div class="col-md-6 text-md-end mt-2 mt-md-0">
+							<a href="{{ url_for('edit_article', id=article.id) }}"
+								class="btn btn-outline-warning btn-sm me-1">
+								✏️ Редактировать
+							</a>
+							<form action="{{ url_for('delete_article', id=article.id) }}" method="POST" class="d-inline"
+								onsubmit="return confirm('Удалить статью?')">
+								<button type="submit" class="btn btn-outline-danger btn-sm">
+									🗑️ Удалить
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	{% else %}
+	<div class="text-center py-5">
+		{% if current_category %}
+		<h4>В категории "{{ current_category }}" пока нет статей</h4>
+		<p class="text-muted">
+			Попробуйте выбрать другую категорию или
+			<a href="{{ url_for('articles') }}">посмотреть все статьи</a>
+		</p>
+		{% else %}
+		<h4>Пока что нет статей :(</h4>
+		<a href="{{ url_for('create_article') }}" class="btn btn-success mt-3">Создать первую статью</a>
+		{% endif %}
+	</div>
+	{% endif %}
+</div>
+{% endblock %}
