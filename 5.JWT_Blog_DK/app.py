@@ -519,12 +519,17 @@ def api_articles_detail(id):
 
 #CRUD API
 @app.route("/api/articles", methods=['POST'])
+@jwt_required()
 def api_create_article():
-    if not current_user.is_authenticated:
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user:
         return jsonify({
             'success': False,
-            'error': 'Требуется авторизация'
-        })
+            'error': 'Пользователь не найден'
+        }), 401
+    
     data = request.get_json()
 
     if not data:
@@ -560,7 +565,7 @@ def api_create_article():
         title=title,
         text=text,
         category=category,
-        author=current_user,
+        author=user,
         created_date=datetime.now()
         )
         
@@ -574,12 +579,16 @@ def api_create_article():
     })
 
 @app.route("/api/articles/<int:id>", methods=['PUT'])
+@jwt_required()
 def api_update_article(id):
-    if not current_user.is_authenticated:
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user:
         return jsonify({
             'success': False,
-            'error': 'Требуется авторизация'
-        })
+            'error': 'Пользователь не найден'
+        }), 401
     
     article = Article.query.get(id)
 
@@ -589,7 +598,7 @@ def api_update_article(id):
             'error': 'Статья не найдена'
         })
     
-    if article.author != current_user:
+    if article.author != user:
         return jsonify({
             'success': False,
             'error': 'У вас нет прав для редактирования этой статьи'
@@ -647,12 +656,16 @@ def api_update_article(id):
     })
 
 @app.route("/api/articles/<int:id>", methods=['DELETE'])
+@jwt_required()
 def api_delete_article(id):
-    if not current_user.is_authenticated:
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user:
         return jsonify({
             'success': False,
-            'error': 'Требуется авторизация'
-        })
+            'error': 'Пользователь не найден'
+        }), 401
     
     article = Article.query.get(id)
 
@@ -662,7 +675,7 @@ def api_delete_article(id):
             'error': 'Статья не найдена'
         })
     
-    if article.author != current_user:
+    if article.author != user:
         return jsonify({
             'success': False,
             'error': 'У вас нет прав для удаления этой статьи'
@@ -767,12 +780,16 @@ def api_comment_detail(id):
 
 #CRUD API комментарии
 @app.route("/api/comment", methods=['POST'])
+@jwt_required()
 def api_create_comment():
-    if not current_user.is_authenticated:
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user:
         return jsonify({
             'success': False,
-            'error': 'Требуется авторизация'
-        })
+            'error': 'Пользователь не найден'
+        }), 401
     
     data = request.get_json()
 
@@ -807,8 +824,8 @@ def api_create_comment():
     comment = Comment(
         text=text,
         article_id=article_id,
-        author_name=current_user.name,
-        user_id=current_user.id,
+        author_name=user.name,
+        user_id=user.id,
         date=datetime.now()
     )
     
@@ -822,12 +839,16 @@ def api_create_comment():
     })
 
 @app.route("/api/comment/<int:id>", methods=['PUT'])
+@jwt_required()
 def api_update_comment(id):
-    if not current_user.is_authenticated:
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user:
         return jsonify({
             'success': False,
-            'error': 'Требуется авторизация'
-        })
+            'error': 'Пользователь не найден'
+        }), 401
     
     comment = Comment.query.get(id)
     if not comment:
@@ -836,7 +857,7 @@ def api_update_comment(id):
             'error': 'Комментарий не найден'
         })
 
-    if comment.user_id != current_user.id:
+    if comment.user_id != user.id:
         return jsonify({
             'success': False,
             'error': 'У вас нет прав для редактирования этого комментария'
@@ -880,12 +901,16 @@ def api_update_comment(id):
     })
 
 @app.route("/api/comment/<int:id>", methods=['DELETE'])
+@jwt_required()
 def api_delete_comment(id):
-    if not current_user.is_authenticated:
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user:
         return jsonify({
             'success': False,
-            'error': 'Требуется авторизация'
-        })
+            'error': 'Пользователь не найден'
+        }), 401
     
     comment = Comment.query.get(id)
     if not comment:
@@ -894,7 +919,7 @@ def api_delete_comment(id):
             'error': 'Комментарий не найден'
         })
     
-    if comment.user_id != current_user.id:
+    if comment.user_id != user.id:
         return jsonify({
             'success': False,
             'error': 'У вас нет прав для удаления этого комментария'
