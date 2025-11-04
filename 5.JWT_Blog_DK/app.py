@@ -5,6 +5,7 @@ from models import db, User, Article, Comment
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from middleware import jwt_middleware
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///news_blog_DK.db'
@@ -23,6 +24,10 @@ login_manager.login_view = 'login'
 login_manager.login_message = 'Пожалуйста, войдите для доступа к странице.'
 
 jwt = JWTManager(app)
+
+@app.before_request
+def before_request():
+    return jwt_middleware()
 
 @login_manager.user_loader
 def load_user(user_id):
