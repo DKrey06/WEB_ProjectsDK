@@ -136,8 +136,8 @@ def handle_invalid_token_error(reason):
     }), 422
 
 @jwt.expired_token_loader
-def handle_expired_token_error(expired_token):
-    token_type = expired_token['type']
+def handle_expired_token_error(jwt_header, jwt_payload):
+    token_type = jwt_payload['type']
     return jsonify({
         'success': False,
         'error': f'{token_type} токен просрочен',
