@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Страница о нас
+{% endblock %}
+
+{% block content %}
+<h1>О нас и нашем проекте</h1>
+<hr class="featurette-divider">
+<div class="row featurette">
+	<div class="col-md-7">
+		<h2 class="featurette-heading fw-normal lh-1">
+			Читайте наши классные статьи!
+			<span class="text-body-secondary">Вам обязательно понравиться :)</span>
+		</h2>
+		<p class="lead">
+			NEWS_DK - это современный новостной блог, где публикуются актуальные статьи на различные темы. Мы стремимся
+			предоставлять качественный контент, который будет интересен и полезен нашим читателям.
+		</p>
+	</div>
+	<div class="col-md-5">
+		<img src="{{url_for('static',filename='images/News_about.png')}}" width="300px">
+	</div>
+</div>
+<hr class="featurette-divider">
+<div class="row featurette">
+	<div class="col-md-7 order-md-2">
+		<h2 class="featurette-heading fw-normal lh-1">
+			Немного о создателе :)
+			<span class="text-body-secondary">Он прикольный</span>
+		</h2>
+		<p class="lead">
+			Создатель сайта - Кретов Дмитрий, студент ДВФУ. Этот проект разработан как лабораторная работа
+		</p>
+	</div>
+	<div class="col-md-5 order-md-1">
+		<img src="{{url_for('static',filename='images/Creator.jpg')}}" width="300px">
+	</div>
+</div>
+<hr class="featurette-divider">
+{% endblock %}
