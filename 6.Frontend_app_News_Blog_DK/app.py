@@ -800,6 +800,32 @@ def api_articles_sorted(sort_type):
     })
 
 #API комментарии
+@app.route("/api/comments", methods=['GET'])
+def api_comments_by_article():
+    article_id = request.args.get('article_id')
+    
+    if article_id:
+        try:
+            article_id = int(article_id)
+            comments = Comment.query.filter_by(article_id=article_id).order_by(Comment.date.desc()).all()
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': 'Неверный ID статьи'
+            }), 400
+    else:
+        comments = Comment.query.order_by(Comment.date.desc()).all()
+    
+    comments_data = []
+    for comment in comments:
+        comments_data.append(comment.to_dict())
+    
+    return jsonify({
+        'success': True,
+        'count': len(comments_data),
+        'comments': comments_data
+    })
+
 @app.route("/api/comment", methods=['GET'])
 def api_comments():
     comments = Comment.query.order_by(Comment.date.desc()).all()
@@ -990,7 +1016,78 @@ def api_delete_comment(id):
         'success': True,
         'message': 'Комментарий удален'
     })
+#Еще эндпоинты для API
+@app.route("/api/auth/register", methods=['POST'])
+def api_register():
+    data = request.get_json()
+    if not data:
+        return jsonify({
+            'success': False,
+            'error': 'Нет данных в теле запроса'
+        })
+    
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
+    errors = {}
 
+    if not name:
+        errors['name'] = 'Обязательно введите имя'
+    elif len(name) < 2:
+        errors['name'] = 'Имя должно содержать минимум 2 символа'
+    
+    if not email:
+        errors['email'] = 'Обязательно введите email'
+    else:
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            errors['email'] = 'Введите корректный email адрес'
+        elif User.query.filter_by(email=email).first():
+            errors['email'] = 'Пользователь с таким email уже существует'
+    
+    if not password:
+        errors['password'] = 'Обязательно введите пароль'
+    elif len(password) < 6:
+        errors['password'] = 'Пароль должен содержать минимум 6 символов'
+    
+    if errors:
+        return jsonify({
+            'success': False,
+            'errors': errors
+        })
+    
+    try:
+        user = User(
+            name=name,
+            email=email
+        )
+        user.set_password(password)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        # Создаем токены для автоматического входа после регистрации
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Регистрация прошла успешно!',
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'user': {
+                'id': user.id,
+                'name': user.name,
+                'email': user.email
+            }
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': f'Ошибка при регистрации: {str(e)}'
+        }), 500
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
