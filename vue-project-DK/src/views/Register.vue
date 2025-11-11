@@ -86,9 +86,10 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService } from '@/services/auth-api'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const form = reactive({
   name: '',
@@ -144,23 +145,27 @@ const handleRegister = async () => {
   message.value = ''
 
   try {
-    // TODO: Заменить на реальный API endpoint для регистрации
-    // const response = await authService.register(form)
+    const result = await authStore.register({
+      name: form.name,
+      email: form.email,
+      password: form.password
+    })
     
-    // Временно симулируем успешную регистрацию
-    setTimeout(() => {
-      message.value = 'Регистрация прошла успешно! Теперь вы можете войти.'
+    if (result.success) {
+      message.value = 'Регистрация прошла успешно! Добро пожаловать!'
       messageType.value = 'success'
-      loading.value = false
       
       setTimeout(() => {
-        router.push('/login')
+        router.push('/')
       }, 2000)
-    }, 1000)
-
+    } else {
+      message.value = result.error || 'Ошибка регистрации'
+      messageType.value = 'danger'
+    }
   } catch (error) {
-    message.value = error.response?.data?.error || 'Ошибка регистрации'
+    message.value = 'Ошибка регистрации'
     messageType.value = 'danger'
+  } finally {
     loading.value = false
   }
 }
