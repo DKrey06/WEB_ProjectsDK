@@ -1,16 +1,14 @@
 <template>
-  <h1>Hello World</h1>
   <div id="app">
-    <RouterView />
+    <Header />
+    <main class="main-content">
+      <RouterView />
+    </main>
   </div>
-  
 </template>
 
-<script>
-
-export default {
-  name: 'App'
-}
+<script setup>
+import Header from '@/components/common/Header.vue';
 </script>
 
 <style>
@@ -31,5 +29,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 0;
 }
 </style>
