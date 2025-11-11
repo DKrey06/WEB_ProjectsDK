@@ -7,8 +7,10 @@
       
       <ul class="nav-menu">
         <li><router-link to="/">Главная</router-link></li>
-		<li><router-link to="/about">О проекте</router-link></li>
+        <li><router-link to="/about">О проекте</router-link></li>
         <li><router-link to="/articles">Все статьи</router-link></li>
+        <li><router-link to="/contact">Контакты</router-link></li>
+        <li><router-link to="/feedback">Обратная связь</router-link></li>
         <li v-if="authStore.isAuthenticated">
           <router-link to="/create-article">Создать статью</router-link>
         </li>
@@ -30,11 +32,14 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
+const router = useRouter();
 
 const logout = () => {
   authStore.logout();
+  router.push('/');
 };
 </script>
 
@@ -66,7 +71,7 @@ const logout = () => {
 .nav-menu {
   display: flex;
   list-style: none;
-  gap: 2rem;
+  gap: 1.5rem;
   margin: 0;
   padding: 0;
 }
@@ -76,6 +81,7 @@ const logout = () => {
   color: #2c3e50;
   font-weight: 500;
   transition: color 0.3s;
+  font-size: 0.9rem;
 }
 
 .nav-menu a:hover,
@@ -134,5 +140,38 @@ const logout = () => {
 
 .btn-logout:hover {
   background: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .nav-menu {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-menu a {
+    font-size: 0.8rem;
+  }
+
+  .nav-auth {
+    gap: 0.5rem;
+  }
+
+  .user-greeting {
+    font-size: 0.8rem;
+  }
+
+  .btn-login,
+  .btn-register,
+  .btn-logout {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
 }
 </style>
