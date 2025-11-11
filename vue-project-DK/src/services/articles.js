@@ -33,7 +33,6 @@ export const articleService = {
 
 	async getCategories() {
 		const response = await api.get('/articles');
-		// Извлекаем уникальные категории из статей
 		const articles = response.data.articles;
 		const categories = [...new Set(articles.map(article => article.category))];
 		return categories;

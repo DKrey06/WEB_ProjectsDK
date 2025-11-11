@@ -10,7 +10,6 @@ const api = axios.create({
 	},
 });
 
-// Интерцептор для добавления токена
 api.interceptors.request.use(
 	(config) => {
 		const authStore = useAuthStore();
@@ -27,7 +26,6 @@ api.interceptors.request.use(
 	}
 );
 
-// Интерцептор для обработки ошибок
 api.interceptors.response.use(
 	(response) => response,
 	async (error) => {
@@ -38,7 +36,6 @@ api.interceptors.response.use(
 
 			const authStore = useAuthStore();
 			try {
-				// Используем правильное имя функции
 				const success = await authStore.refreshToken();
 				if (success) {
 					return api(originalRequest);
