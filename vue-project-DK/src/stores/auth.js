@@ -33,6 +33,30 @@ export const useAuthStore = defineStore('auth', () => {
 		}
 	}
 
+	async function register(userData) {
+		try {
+			const response = await authService.register(userData);
+
+			if (response.success) {
+				user.value = response.user;
+				accessToken.value = response.access_token;
+				refreshTokenValue.value = response.refresh_token;
+
+				Cookies.set('access_token', response.access_token, { expires: 1 });
+				Cookies.set('refresh_token', response.refresh_token, { expires: 30 });
+
+				return { success: true };
+			} else {
+				return { success: false, error: response.error };
+			}
+		} catch (error) {
+			return {
+				success: false,
+				error: error.response?.data?.error || 'Ошибка регистрации'
+			};
+		}
+	}
+
 	async function refreshToken() {
 		try {
 			const response = await authService.refreshToken();
@@ -64,6 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
 		refreshToken: refreshTokenValue,
 		isAuthenticated,
 		login,
+		register,
 		refreshToken: refreshToken,
 		logout
 	};
