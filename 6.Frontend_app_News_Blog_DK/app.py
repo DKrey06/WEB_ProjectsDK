@@ -1066,7 +1066,6 @@ def api_register():
         db.session.add(user)
         db.session.commit()
         
-        # Создаем токены для автоматического входа после регистрации
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
         
