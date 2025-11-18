@@ -31,10 +31,27 @@ export const articleService = {
 		return response.data;
 	},
 
+	async searchArticles(query) {
+		const response = await api.get(`/api/articles/search?q=${encodeURIComponent(query)}`);
+		return response.data;
+	},
+
+	async getArticlesSorted(sortType) {
+		const response = await api.get(`/api/articles/sort/${sortType}`);
+		return response.data;
+	},
+
 	async getCategories() {
-		const response = await api.get('/api/articles');
-		const articles = response.data.articles;
-		const categories = [...new Set(articles.map(article => article.category))];
-		return categories;
+		const response = await api.get('/api/categories');
+		return response.data;
+	},
+	async updateArticle(id, articleData) {
+		const response = await api.put(`/api/articles/${id}`, articleData);
+		return response.data;
+	},
+
+	async deleteArticle(id) {
+		const response = await api.delete(`/api/articles/${id}`);
+		return response.data;
 	}
 };

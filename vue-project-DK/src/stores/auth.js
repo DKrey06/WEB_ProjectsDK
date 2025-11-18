@@ -6,7 +6,6 @@ import Cookies from 'js-cookie';
 export const useAuthStore = defineStore('auth', () => {
 	const user = ref(null);
 	const accessToken = ref(Cookies.get('access_token') || null);
-	const refreshTokenValue = ref(Cookies.get('refresh_token') || null);
 	const isAuthenticated = computed(() => !!accessToken.value);
 
 	async function login(credentials) {
@@ -16,10 +15,11 @@ export const useAuthStore = defineStore('auth', () => {
 			if (response.success) {
 				user.value = response.user;
 				accessToken.value = response.access_token;
-				refreshTokenValue.value = response.refresh_token;
 
-				Cookies.set('access_token', response.access_token, { expires: 1 });
+				Cookies.set('access_token', response.access_token, { expires: 5 / (24 * 60) });
 				Cookies.set('refresh_token', response.refresh_token, { expires: 30 });
+
+				await checkAuth();
 
 				return { success: true };
 			} else {
@@ -40,10 +40,11 @@ export const useAuthStore = defineStore('auth', () => {
 			if (response.success) {
 				user.value = response.user;
 				accessToken.value = response.access_token;
-				refreshTokenValue.value = response.refresh_token;
 
-				Cookies.set('access_token', response.access_token, { expires: 1 });
+				Cookies.set('access_token', response.access_token, { expires: 5 / (24 * 60) });
 				Cookies.set('refresh_token', response.refresh_token, { expires: 30 });
+
+				await checkAuth();
 
 				return { success: true };
 			} else {
@@ -57,22 +58,9 @@ export const useAuthStore = defineStore('auth', () => {
 		}
 	}
 
-	async function refreshToken() {
-		try {
-			const response = await authService.refreshToken();
-			accessToken.value = response.access_token;
-			Cookies.set('access_token', response.access_token, { expires: 1 });
-			return true;
-		} catch (error) {
-			this.logout();
-			return false;
-		}
-	}
-
 	function logout() {
 		user.value = null;
 		accessToken.value = null;
-		refreshTokenValue.value = null;
 
 		Cookies.remove('access_token');
 		Cookies.remove('refresh_token');
@@ -82,14 +70,31 @@ export const useAuthStore = defineStore('auth', () => {
 		}
 	}
 
+	async function checkAuth() {
+		if (!accessToken.value) {
+			return false;
+		}
+
+		try {
+			const response = await authService.verifyToken();
+			if (response.success) {
+				user.value = response.user;
+				return true;
+			}
+		} catch (error) {
+			console.log('Auth check failed:', error.response?.data?.error || error.message);
+			return false;
+		}
+		return false;
+	}
+
 	return {
 		user,
 		accessToken,
-		refreshToken: refreshTokenValue,
 		isAuthenticated,
 		login,
 		register,
-		refreshToken: refreshToken,
-		logout
+		logout,
+		checkAuth
 	};
 });

@@ -9,4 +9,10 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
+import { useAuthStore } from '@/stores/auth';
+const authStore = useAuthStore();
+authStore.checkAuth().then(isAuthenticated => {
+	console.log('Initial auth check:', isAuthenticated);
+});
+
 app.mount('#app')
