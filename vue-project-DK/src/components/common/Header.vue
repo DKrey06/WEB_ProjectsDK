@@ -2,7 +2,10 @@
   <header class="header">
     <nav class="nav">
       <div class="nav-brand">
-        <router-link to="/" class="logo">NEWS_DK</router-link>
+        <router-link to="/" class="logo">
+          <img src="/images/LogoCat.png" alt="Логотип" class="logo-image">
+          NEWS_DK
+        </router-link>
       </div>
       
       <ul class="nav-menu">
@@ -62,10 +65,25 @@ const logout = () => {
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   font-size: 1.5rem;
   font-weight: bold;
   text-decoration: none;
   color: #2c3e50;
+  transition: color 0.3s;
+}
+
+.logo:hover {
+  color: #42b883;
+}
+
+.logo-image {
+  width: 52px;
+  height: 52px; 
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .nav-menu {
@@ -125,12 +143,14 @@ const logout = () => {
 }
 
 .btn-register {
-  background: #42b883;
-  color: white;
+  background: transparent;
+  color: #42b883;
+  border: 1px solid #42b883;
 }
 
 .btn-register:hover {
-  background: #369870;
+  background: #42b883;
+  color: white;
 }
 
 .btn-logout {
@@ -172,6 +192,27 @@ const logout = () => {
   .btn-logout {
     padding: 0.4rem 0.8rem;
     font-size: 0.8rem;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+  }
+
+  .logo-image {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.1rem;
+    gap: 0.75rem;
+  }
+
+  .logo-image {
+    width: 36px;
+    height: 36px;
   }
 }
 </style>
