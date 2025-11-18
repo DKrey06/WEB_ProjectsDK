@@ -13,8 +13,9 @@ CORS(app)
 CORS(app, resources={
     r"/api/*": {
         "origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
-        "methods": ["GET", "POST", "PUT", "DELETE"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
     }
 })
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///news_blog_DK.db'
@@ -36,6 +37,8 @@ jwt = JWTManager(app)
 
 @app.before_request
 def before_request():
+    if request.method == 'OPTIONS':
+        return None
     return jwt_middleware()
 
 @login_manager.user_loader
@@ -84,9 +87,12 @@ def api_login():
             'error': 'Неверный email или пароль'
         }), 401
 
-@app.route("/api/auth/refresh", methods=['POST'])
-@jwt_required(refresh=True)
+@app.route("/api/auth/refresh", methods=['POST', 'OPTIONS'])
+@jwt_required(refresh=True, optional=True)
 def api_refresh():
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
+    
     current_user_id = get_jwt_identity()
     
     user = User.query.get(current_user_id)
@@ -97,7 +103,6 @@ def api_refresh():
         })
     
     new_access_token = create_access_token(identity=current_user_id)
-    
     return jsonify({
         'success': True,
         'message': 'Access токен обновлен',
@@ -127,31 +132,6 @@ def api_verify_token():
         'user': user.to_dict()
     }), 200
 
-#Ошибки токенов
-@jwt.unauthorized_loader
-def handle_unauthorized_error(reason):
-    return jsonify({
-        'success': False,
-        'error': 'Токен отсутствует или неверный формат',
-        'details': reason
-    }), 401
-
-@jwt.invalid_token_loader
-def handle_invalid_token_error(reason):
-    return jsonify({
-        'success': False,
-        'error': 'Неверный токен',
-        'details': reason
-    }), 422
-
-@jwt.expired_token_loader
-def handle_expired_token_error(jwt_header, jwt_payload):
-    token_type = jwt_payload['type']
-    return jsonify({
-        'success': False,
-        'error': f'{token_type} токен просрочен',
-        'details': 'Используйте refresh токен для получения нового access токена' if token_type == 'access' else 'Необходима повторная авторизация'
-    }), 401
 
 def init_db():
     with app.app_context():
@@ -1087,6 +1067,48 @@ def api_register():
             'success': False,
             'error': f'Ошибка при регистрации: {str(e)}'
         }), 500
+    
+#Поиск по статьям
+@app.route("/api/articles/search", methods=['GET'])
+def api_articles_search():
+    query = request.args.get('q', '').strip()
+    
+    if not query:
+        return jsonify({
+            'success': False,
+            'error': 'Параметр поиска (q) обязателен'
+        }), 400
+    
+    articles = Article.query.filter(
+        db.or_(
+            Article.title.ilike(f'%{query}%'),
+            Article.text.ilike(f'%{query}%'),
+            Article.category.ilike(f'%{query}%')
+        )
+    ).order_by(Article.created_date.desc()).all()
+    
+    articles_data = []
+    for article in articles:
+        articles_data.append(article.to_dict())
+    
+    return jsonify({
+        'success': True,
+        'count': len(articles_data),
+        'query': query,
+        'articles': articles_data
+    })
+
+#Получение всех категорий для фильтра
+@app.route("/api/categories", methods=['GET'])
+def api_categories():
+    categories = db.session.query(Article.category).distinct().all()
+    categories_list = [category[0] for category in categories]
+    
+    return jsonify({
+        'success': True,
+        'categories': categories_list
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
