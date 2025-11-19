@@ -11,35 +11,47 @@
               placeholder="Поиск по статьям..."
               class="search-input"
               @input="handleSearch"
-            >
+            />
             <span class="search-icon">🔍</span>
           </div>
         </div>
-        
+
         <div class="filters-row">
           <div class="filter-group">
             <label class="filter-label">Категория:</label>
-            <select v-model="selectedCategory" @change="handleCategoryChange" class="filter-select">
+            <select
+              v-model="selectedCategory"
+              @change="handleCategoryChange"
+              class="filter-select"
+            >
               <option value="">Все категории</option>
-              <option v-for="category in categories" :key="category" :value="category">
+              <option
+                v-for="category in categories"
+                :key="category"
+                :value="category"
+              >
                 {{ category }}
               </option>
             </select>
           </div>
-          
+
           <div class="filter-group">
             <label class="filter-label">Сортировка:</label>
-            <select v-model="sortBy" @change="handleSortChange" class="filter-select">
+            <select
+              v-model="sortBy"
+              @change="handleSortChange"
+              class="filter-select"
+            >
               <option value="newest">Сначала новые</option>
               <option value="oldest">Сначала старые</option>
             </select>
           </div>
-          
+
           <button @click="clearFilters" class="btn-clear">
             Очистить фильтры
           </button>
         </div>
-        
+
         <div v-if="searchQuery || selectedCategory" class="active-filters">
           <span class="active-filter" v-if="searchQuery">
             Поиск: "{{ searchQuery }}"
@@ -51,13 +63,19 @@
           </span>
         </div>
       </div>
-      
+
       <div v-if="loading" class="loading">Загрузка...</div>
-      
+
       <div v-else-if="articles.length === 0" class="no-articles">
-        <p v-if="searchQuery || selectedCategory">Статьи по вашему запросу не найдены</p>
+        <p v-if="searchQuery || selectedCategory">
+          Статьи по вашему запросу не найдены
+        </p>
         <p v-else>Пока нет статей</p>
-        <button @click="clearFilters" class="btn-primary" v-if="searchQuery || selectedCategory">
+        <button
+          @click="clearFilters"
+          class="btn-primary"
+          v-if="searchQuery || selectedCategory"
+        >
           Показать все статьи
         </button>
       </div>
@@ -89,16 +107,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { articleService } from '@/services/articles';
-import { debounce } from '@/utils/helpers';
+import { ref, onMounted } from "vue";
+import { articleService } from "@/services/articles";
+import { debounce } from "@/utils/helpers";
 
 const articles = ref([]);
 const categories = ref([]);
 const loading = ref(true);
-const searchQuery = ref('');
-const selectedCategory = ref('');
-const sortBy = ref('newest');
+const searchQuery = ref("");
+const selectedCategory = ref("");
+const sortBy = ref("newest");
 
 const isNewArticle = (article) => {
   const articleDate = new Date(article.created_date);
@@ -109,11 +127,11 @@ const isNewArticle = (article) => {
 };
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('ru-RU');
+  return new Date(dateString).toLocaleDateString("ru-RU");
 };
 
 const getArticlePreview = (text) => {
-  return text.slice(0, 150) + (text.length > 150 ? '...' : '');
+  return text.slice(0, 150) + (text.length > 150 ? "..." : "");
 };
 
 const fetchCategories = async () => {
@@ -123,15 +141,19 @@ const fetchCategories = async () => {
       categories.value = response.categories;
     }
   } catch (error) {
-    console.error('Ошибка загрузки категорий:', error);
+    console.error("Ошибка загрузки категорий:", error);
     try {
       const articlesResponse = await articleService.getArticles();
       if (articlesResponse.success) {
-        const uniqueCategories = [...new Set(articlesResponse.articles.map(article => article.category))];
+        const uniqueCategories = [
+          ...new Set(
+            articlesResponse.articles.map((article) => article.category)
+          ),
+        ];
         categories.value = uniqueCategories;
       }
     } catch (fallbackError) {
-      console.error('Ошибка fallback загрузки категорий:', fallbackError);
+      console.error("Ошибка fallback загрузки категорий:", fallbackError);
     }
   }
 };
@@ -144,18 +166,24 @@ const fetchArticles = async () => {
     if (searchQuery.value) {
       response = await articleService.searchArticles(searchQuery.value);
     } else if (selectedCategory.value) {
-      response = await articleService.getArticlesByCategory(selectedCategory.value);
+      response = await articleService.getArticlesByCategory(
+        selectedCategory.value
+      );
     } else {
       response = await articleService.getArticles();
     }
 
     if (response.success) {
       let articlesData = response.articles || [];
-      
-      if (sortBy.value === 'oldest') {
-        articlesData.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+
+      if (sortBy.value === "oldest") {
+        articlesData.sort(
+          (a, b) => new Date(a.created_date) - new Date(b.created_date)
+        );
       } else {
-        articlesData.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+        articlesData.sort(
+          (a, b) => new Date(b.created_date) - new Date(a.created_date)
+        );
       }
 
       articles.value = articlesData;
@@ -163,7 +191,7 @@ const fetchArticles = async () => {
       articles.value = [];
     }
   } catch (error) {
-    console.error('Ошибка загрузки статей:', error);
+    console.error("Ошибка загрузки статей:", error);
     articles.value = [];
   } finally {
     loading.value = false;
@@ -183,19 +211,19 @@ const handleSortChange = () => {
 };
 
 const clearFilters = () => {
-  searchQuery.value = '';
-  selectedCategory.value = '';
-  sortBy.value = 'newest';
+  searchQuery.value = "";
+  selectedCategory.value = "";
+  sortBy.value = "newest";
   fetchArticles();
 };
 
 const clearSearch = () => {
-  searchQuery.value = '';
+  searchQuery.value = "";
   fetchArticles();
 };
 
 const clearCategory = () => {
-  selectedCategory.value = '';
+  selectedCategory.value = "";
   fetchArticles();
 };
 
@@ -229,7 +257,7 @@ h1 {
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
 
@@ -352,7 +380,7 @@ h1 {
 }
 
 .btn-remove-filter:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .articles-grid {
@@ -366,7 +394,7 @@ h1 {
   background: white;
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   display: flex;
   flex-direction: column;
@@ -375,7 +403,7 @@ h1 {
 
 .article-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
 .article-header {
@@ -502,21 +530,21 @@ h1 {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .article-card {
     padding: 1.25rem;
   }
-  
+
   .filters-row {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .btn-clear {
     margin-left: 0;
     align-self: flex-start;
   }
-  
+
   .search-input-wrapper {
     max-width: none;
   }
@@ -526,13 +554,13 @@ h1 {
   .container {
     padding: 0 1rem;
   }
-  
+
   .article-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .new-badge {
     align-self: flex-start;
   }

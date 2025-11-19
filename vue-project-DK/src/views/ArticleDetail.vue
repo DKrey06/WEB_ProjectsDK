@@ -1,8 +1,15 @@
 <template>
   <div class="article-detail">
     <div class="container mt-4">
-      
-      <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger', 'alert-dismissible fade show']" role="alert">
+      <div
+        v-if="message"
+        :class="[
+          'alert',
+          messageType === 'success' ? 'alert-success' : 'alert-danger',
+          'alert-dismissible fade show',
+        ]"
+        role="alert"
+      >
         {{ message }}
         <button type="button" class="btn-close" @click="clearMessage"></button>
       </div>
@@ -12,7 +19,9 @@
           <div class="d-flex justify-content-between align-items-start mb-3">
             <h1 class="display-6 mb-0 flex-grow-1">{{ article.title }}</h1>
             <div class="d-flex align-items-center gap-2 ms-3">
-              <span v-if="isNewArticle" class="badge bg-success new-badge">НОВОЕ</span>
+              <span v-if="isNewArticle" class="badge bg-success new-badge"
+                >НОВОЕ</span
+              >
               <div v-if="authStore.isAuthenticated" class="article-actions">
                 <button @click="editArticle" class="btn btn-warning btn-sm">
                   ✏️ Редактировать
@@ -26,7 +35,9 @@
           <p class="text-muted mb-1">
             📅 Опубликовано: {{ formatDate(article.created_date) }}
           </p>
-          <p class="text-muted mb-1">Автор: {{ article.author_name || article.author }}</p>
+          <p class="text-muted mb-1">
+            Автор: {{ article.author_name || article.author }}
+          </p>
           <p class="text-muted mb-0">Категория: {{ article.category }}</p>
         </header>
 
@@ -40,23 +51,34 @@
           <div v-if="authStore.isAuthenticated" class="card mb-4">
             <div class="card-body">
               <h5 class="card-title">Добавить комментарий</h5>
-              <p class="text-muted small">Вы вошли как: <strong>{{ authStore.user?.name }}</strong></p>
+              <p class="text-muted small">
+                Вы вошли как: <strong>{{ authStore.user?.name }}</strong>
+              </p>
               <form @submit.prevent="addComment">
                 <div class="mb-3">
                   <label class="form-label">Текст комментария:</label>
-                  <textarea 
-                    class="form-control" 
+                  <textarea
+                    class="form-control"
                     :class="{ 'is-invalid': errors.text }"
                     v-model="commentForm.text"
-                    rows="4" 
+                    rows="4"
                     placeholder="Введите ваш комментарий..."
                     :disabled="commentLoading"
                   ></textarea>
-                  <div v-if="errors.text" class="invalid-feedback d-block">{{ errors.text }}</div>
+                  <div v-if="errors.text" class="invalid-feedback d-block">
+                    {{ errors.text }}
+                  </div>
                 </div>
-                <button type="submit" class="btn btn-primary" :disabled="commentLoading || !commentForm.text.trim()">
-                  <span v-if="commentLoading" class="spinner-border spinner-border-sm me-2"></span>
-                  {{ commentLoading ? 'Отправка...' : 'Отправить комментарий' }}
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  :disabled="commentLoading || !commentForm.text.trim()"
+                >
+                  <span
+                    v-if="commentLoading"
+                    class="spinner-border spinner-border-sm me-2"
+                  ></span>
+                  {{ commentLoading ? "Отправка..." : "Отправить комментарий" }}
                 </button>
               </form>
             </div>
@@ -65,12 +87,20 @@
           <div v-else class="card mb-4">
             <div class="card-body text-center">
               <h5 class="card-title">Хотите оставить комментарий?</h5>
-              <p class="text-muted">Войдите в систему, чтобы добавить комментарий к этой статье</p>
+              <p class="text-muted">
+                Войдите в систему, чтобы добавить комментарий к этой статье
+              </p>
               <div class="d-flex gap-2 justify-content-center">
-                <router-link :to="`/login?redirect=/articles/${article.id}`" class="btn btn-primary">
+                <router-link
+                  :to="`/login?redirect=/articles/${article.id}`"
+                  class="btn btn-primary"
+                >
                   Войти
                 </router-link>
-                <router-link :to="`/register?redirect=/articles/${article.id}`" class="btn btn-outline-primary">
+                <router-link
+                  :to="`/register?redirect=/articles/${article.id}`"
+                  class="btn btn-outline-primary"
+                >
                   Зарегистрироваться
                 </router-link>
               </div>
@@ -84,18 +114,42 @@
           </div>
 
           <div v-else-if="comments.length > 0">
-            <div v-for="comment in comments" :key="comment.id" class="card mb-3">
+            <div
+              v-for="comment in comments"
+              :key="comment.id"
+              class="card mb-3"
+            >
               <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                  <h6 class="card-subtitle mb-1 text-primary">{{ comment.author_name }}</h6>
-                  <small class="text-muted">{{ formatDate(comment.date) }}</small>
+                <div
+                  class="d-flex justify-content-between align-items-start mb-2"
+                >
+                  <h6 class="card-subtitle mb-1 text-primary">
+                    {{ comment.author_name }}
+                  </h6>
+                  <small class="text-muted">{{
+                    formatDate(comment.date)
+                  }}</small>
                 </div>
                 <p class="card-text">{{ comment.text }}</p>
-                <div v-if="authStore.isAuthenticated && authStore.user?.id === comment.user_id" class="mt-2">
-                  <button @click="editComment(comment)" class="btn btn-sm btn-outline-warning me-2" :disabled="commentLoading">
+                <div
+                  v-if="
+                    authStore.isAuthenticated &&
+                    authStore.user?.id === comment.user_id
+                  "
+                  class="mt-2"
+                >
+                  <button
+                    @click="editComment(comment)"
+                    class="btn btn-sm btn-outline-warning me-2"
+                    :disabled="commentLoading"
+                  >
                     Редактировать
                   </button>
-                  <button @click="deleteComment(comment.id)" class="btn btn-sm btn-outline-danger" :disabled="commentLoading">
+                  <button
+                    @click="deleteComment(comment.id)"
+                    class="btn btn-sm btn-outline-danger"
+                    :disabled="commentLoading"
+                  >
                     Удалить
                   </button>
                 </div>
@@ -123,227 +177,246 @@
 
       <div v-else class="text-center py-5">
         <div class="error alert alert-danger">Статья не найдена</div>
-        <router-link to="/" class="btn btn-primary mt-3">На главную</router-link>
+        <router-link to="/" class="btn btn-primary mt-3"
+          >На главную</router-link
+        >
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { articleService } from '@/services/articles'
-import { commentService } from '@/services/comments'
+import { ref, reactive, computed, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+import { articleService } from "@/services/articles";
+import { commentService } from "@/services/comments";
 
-const route = useRoute()
-const router = useRouter()
-const authStore = useAuthStore()
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
 
-const article = ref(null)
-const comments = ref([])
-const loading = ref(true)
-const commentsLoading = ref(false)
-const commentLoading = ref(false)
-const message = ref('')
-const messageType = ref('')
+const article = ref(null);
+const comments = ref([]);
+const loading = ref(true);
+const commentsLoading = ref(false);
+const commentLoading = ref(false);
+const message = ref("");
+const messageType = ref("");
 
 const commentForm = reactive({
-  text: ''
-})
+  text: "",
+});
 
-const errors = ref({})
+const errors = ref({});
 
 const isNewArticle = computed(() => {
-  if (!article.value) return false
-  const articleDate = new Date(article.value.created_date)
-  const today = new Date()
-  const diffTime = today - articleDate
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-  return diffDays < 1
-})
+  if (!article.value) return false;
+  const articleDate = new Date(article.value.created_date);
+  const today = new Date();
+  const diffTime = today - articleDate;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays < 1;
+});
 
 const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("ru-RU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 const clearMessage = () => {
-  message.value = ''
-  messageType.value = ''
-}
+  message.value = "";
+  messageType.value = "";
+};
 
-const showMessage = (text, type = 'success') => {
-  message.value = text
-  messageType.value = type
-}
+const showMessage = (text, type = "success") => {
+  message.value = text;
+  messageType.value = type;
+};
 
 const fetchArticle = async () => {
   try {
-    loading.value = true
-    clearMessage()
-    
-    const articleId = parseInt(route.params.id)
+    loading.value = true;
+    clearMessage();
+
+    const articleId = parseInt(route.params.id);
     if (!articleId) {
-      throw new Error('Неверный ID статьи')
+      throw new Error("Неверный ID статьи");
     }
 
-    const response = await articleService.getArticle(articleId)
-    
+    const response = await articleService.getArticle(articleId);
+
     if (response.success) {
-      article.value = response.article
-      await fetchComments()
+      article.value = response.article;
+      await fetchComments();
     } else {
-      throw new Error(response.error || 'Статья не найдена')
+      throw new Error(response.error || "Статья не найдена");
     }
   } catch (error) {
-    showMessage(error.response?.data?.error || error.message || 'Статья не найдена', 'danger')
+    showMessage(
+      error.response?.data?.error || error.message || "Статья не найдена",
+      "danger"
+    );
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const fetchComments = async () => {
   try {
-    commentsLoading.value = true
-    const articleId = parseInt(route.params.id)
-    
-    const response = await commentService.getComments()
-    
+    commentsLoading.value = true;
+    const articleId = parseInt(route.params.id);
+
+    const response = await commentService.getComments();
+
     if (response.success) {
-      comments.value = response.comments.filter(comment => 
-        comment.article_id === articleId
-      )
+      comments.value = response.comments.filter(
+        (comment) => comment.article_id === articleId
+      );
     } else {
-      throw new Error(response.error || 'Ошибка загрузки комментариев')
+      throw new Error(response.error || "Ошибка загрузки комментариев");
     }
   } catch (error) {
-    comments.value = []
+    comments.value = [];
   } finally {
-    commentsLoading.value = false
+    commentsLoading.value = false;
   }
-}
+};
 
 const addComment = async () => {
-  errors.value = {}
-  
+  errors.value = {};
+
   if (!commentForm.text.trim()) {
-    errors.value.text = 'Обязательно введите текст комментария'
-    return
+    errors.value.text = "Обязательно введите текст комментария";
+    return;
   }
 
   if (commentForm.text.length > 1000) {
-    errors.value.text = 'Комментарий не должен превышать 1000 символов'
-    return
+    errors.value.text = "Комментарий не должен превышать 1000 символов";
+    return;
   }
 
-  commentLoading.value = true
-  
+  commentLoading.value = true;
+
   try {
     const commentData = {
       article_id: article.value.id,
-      text: commentForm.text.trim()
-    }
+      text: commentForm.text.trim(),
+    };
 
-    const response = await commentService.createComment(commentData)
-    
+    const response = await commentService.createComment(commentData);
+
     if (response.success) {
-      showMessage('Комментарий успешно добавлен!', 'success')
-      commentForm.text = ''
-      await fetchComments()
+      showMessage("Комментарий успешно добавлен!", "success");
+      commentForm.text = "";
+      await fetchComments();
     } else {
-      throw new Error(response.error || 'Ошибка при создании комментария')
+      throw new Error(response.error || "Ошибка при создании комментария");
     }
   } catch (error) {
-    showMessage(error.response?.data?.error || error.message || 'Ошибка при добавлении комментария', 'danger')
+    showMessage(
+      error.response?.data?.error ||
+        error.message ||
+        "Ошибка при добавлении комментария",
+      "danger"
+    );
   } finally {
-    commentLoading.value = false
+    commentLoading.value = false;
   }
-}
+};
 
 const editComment = async (comment) => {
-  const newText = prompt('Редактировать комментарий:', comment.text)
+  const newText = prompt("Редактировать комментарий:", comment.text);
   if (newText && newText.trim() !== comment.text) {
     try {
-      commentLoading.value = true
-      const response = await commentService.updateComment(comment.id, { 
-        text: newText.trim() 
-      })
-      
+      commentLoading.value = true;
+      const response = await commentService.updateComment(comment.id, {
+        text: newText.trim(),
+      });
+
       if (response.success) {
-        showMessage('Комментарий успешно обновлен!', 'success')
-        await fetchComments()
+        showMessage("Комментарий успешно обновлен!", "success");
+        await fetchComments();
       } else {
-        throw new Error(response.error || 'Ошибка при обновлении комментария')
+        throw new Error(response.error || "Ошибка при обновлении комментария");
       }
     } catch (error) {
-      showMessage('Ошибка при редактировании комментария', 'danger')
+      showMessage("Ошибка при редактировании комментария", "danger");
     } finally {
-      commentLoading.value = false
+      commentLoading.value = false;
     }
   }
-}
+};
 
 const deleteComment = async (commentId) => {
-  if (!confirm('Вы уверены, что хотите удалить этот комментарий?')) {
-    return
+  if (!confirm("Вы уверены, что хотите удалить этот комментарий?")) {
+    return;
   }
 
   try {
-    commentLoading.value = true
-    const response = await commentService.deleteComment(commentId)
-    
+    commentLoading.value = true;
+    const response = await commentService.deleteComment(commentId);
+
     if (response.success) {
-      showMessage('Комментарий успешно удален!', 'success')
-      await fetchComments()
+      showMessage("Комментарий успешно удален!", "success");
+      await fetchComments();
     } else {
-      throw new Error(response.error || 'Ошибка при удалении комментария')
+      throw new Error(response.error || "Ошибка при удалении комментария");
     }
   } catch (error) {
-    showMessage('Ошибка при удалении комментария', 'danger')
+    showMessage("Ошибка при удалении комментария", "danger");
   } finally {
-    commentLoading.value = false
+    commentLoading.value = false;
   }
-}
+};
 
 const editArticle = () => {
-  router.push(`/edit-article/${article.value.id}`)
-}
+  router.push(`/edit-article/${article.value.id}`);
+};
 
 const deleteArticle = async () => {
-  if (!confirm('Вы уверены, что хотите удалить эту статью? Это действие нельзя отменить.')) {
-    return
+  if (
+    !confirm(
+      "Вы уверены, что хотите удалить эту статью? Это действие нельзя отменить."
+    )
+  ) {
+    return;
   }
 
   try {
-    loading.value = true
-    const response = await articleService.deleteArticle(article.value.id)
-    
+    loading.value = true;
+    const response = await articleService.deleteArticle(article.value.id);
+
     if (response.success) {
-      showMessage('Статья успешно удалена!', 'success')
+      showMessage("Статья успешно удалена!", "success");
       setTimeout(() => {
-        router.push('/')
-      }, 1500)
+        router.push("/");
+      }, 1500);
     } else {
-      throw new Error(response.error || 'Ошибка при удалении статьи')
+      throw new Error(response.error || "Ошибка при удалении статьи");
     }
   } catch (error) {
-    showMessage(error.response?.data?.error || error.message || 'Ошибка при удалении статьи', 'danger')
+    showMessage(
+      error.response?.data?.error ||
+        error.message ||
+        "Ошибка при удалении статьи",
+      "danger"
+    );
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 onMounted(() => {
-  fetchArticle()
-})
+  fetchArticle();
+});
 </script>
 
 <style scoped>
@@ -382,7 +455,7 @@ onMounted(() => {
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
 }
 
@@ -451,7 +524,7 @@ onMounted(() => {
 .card {
   border: none;
   border-radius: 12px;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
   margin-bottom: 1.5rem;
 }
 
@@ -641,20 +714,20 @@ textarea.form-control {
   .container {
     padding: 0 1rem;
   }
-  
+
   .news-detail {
     padding: 2rem 1.5rem;
   }
-  
+
   .display-6 {
     font-size: 2rem;
   }
-  
+
   .article-actions {
     justify-content: flex-start;
     margin-top: 1rem;
   }
-  
+
   .btn {
     width: 100%;
     margin-right: 0;
@@ -665,37 +738,38 @@ textarea.form-control {
   .news-detail {
     padding: 1.5rem 1rem;
   }
-  
+
   .display-6 {
     font-size: 1.75rem;
   }
-  
+
   .card-body {
     padding: 1.25rem;
   }
-  
+
   .form-control {
     padding: 0.875rem;
   }
-  
+
   .article-actions {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .article-actions .btn {
     width: 100%;
   }
 }
 
-.loading, .error {
+.loading,
+.error {
   text-align: center;
   padding: 3rem;
   font-size: 1.2rem;
   color: #666;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .new-badge {

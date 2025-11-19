@@ -9,8 +9,8 @@
 </template>
 
 <script setup>
-import Header from '@/components/common/Header.vue';
-import Footer from '@/components/common/Footer.vue';
+import Header from "@/components/common/Header.vue";
+import Footer from "@/components/common/Footer.vue";
 </script>
 
 <style>
@@ -21,7 +21,7 @@ import Footer from '@/components/common/Footer.vue';
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
   color: #333;
   background-color: #f8f9fa;
@@ -32,6 +32,4 @@ body {
   display: flex;
   flex-direction: column;
 }
-
-
 </style>

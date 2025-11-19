@@ -3,11 +3,11 @@
     <nav class="nav">
       <div class="nav-brand">
         <router-link to="/" class="logo">
-          <img src="/images/LogoCat.png" alt="Логотип" class="logo-image">
+          <img src="/images/LogoCat.png" alt="Логотип" class="logo-image" />
           NEWS_DK
         </router-link>
       </div>
-      
+
       <ul class="nav-menu">
         <li><router-link to="/">Главная</router-link></li>
         <li><router-link to="/about">О проекте</router-link></li>
@@ -26,7 +26,9 @@
         </template>
         <template v-else>
           <router-link to="/login" class="btn-login">Войти</router-link>
-          <router-link to="/register" class="btn-register">Регистрация</router-link>
+          <router-link to="/register" class="btn-register"
+            >Регистрация</router-link
+          >
         </template>
       </div>
     </nav>
@@ -34,22 +36,22 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
 
 const authStore = useAuthStore();
 const router = useRouter();
 
 const logout = () => {
   authStore.logout();
-  router.push('/');
+  router.push("/");
 };
 </script>
 
 <style scoped>
 .header {
   background: #fff;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -81,7 +83,7 @@ const logout = () => {
 
 .logo-image {
   width: 52px;
-  height: 52px; 
+  height: 52px;
   object-fit: contain;
   border-radius: 8px;
 }

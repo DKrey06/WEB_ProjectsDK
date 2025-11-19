@@ -4,7 +4,15 @@
       <h1>Редактирование статьи</h1>
       <p>Внесите изменения в статью</p>
 
-      <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger', 'alert-dismissible fade show']" role="alert">
+      <div
+        v-if="message"
+        :class="[
+          'alert',
+          messageType === 'success' ? 'alert-success' : 'alert-danger',
+          'alert-dismissible fade show',
+        ]"
+        role="alert"
+      >
         {{ message }}
         <button type="button" class="btn-close" @click="message = ''"></button>
       </div>
@@ -20,21 +28,23 @@
         <div class="form-list">
           <div class="mb-3">
             <label class="form-label">Заголовок статьи:</label>
-            <input 
-              class="form-control" 
+            <input
+              class="form-control"
               :class="{ 'is-invalid': errors.title }"
-              type="text" 
+              type="text"
               v-model="form.title"
               maxlength="200"
               placeholder="Введите заголовок статьи"
-            >
-            <div v-if="errors.title" class="invalid-feedback">{{ errors.title }}</div>
+            />
+            <div v-if="errors.title" class="invalid-feedback">
+              {{ errors.title }}
+            </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Категория:</label>
-            <select 
-              class="form-control" 
+            <select
+              class="form-control"
               :class="{ 'is-invalid': errors.category }"
               v-model="form.category"
             >
@@ -45,36 +55,52 @@
               <option value="Наука">Наука</option>
               <option value="Спорт">Спорт</option>
             </select>
-            <div v-if="errors.category" class="invalid-feedback">{{ errors.category }}</div>
+            <div v-if="errors.category" class="invalid-feedback">
+              {{ errors.category }}
+            </div>
             <div class="form-text">
               Или введите новую категорию:
-              <input 
-                type="text" 
-                class="form-control" 
-                v-model="form.newCategory" 
+              <input
+                type="text"
+                class="form-control"
+                v-model="form.newCategory"
                 placeholder="Введите новую категорию"
-              >
+              />
             </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Текст статьи:</label>
-            <textarea 
-              class="form-control" 
+            <textarea
+              class="form-control"
               :class="{ 'is-invalid': errors.text }"
               v-model="form.text"
               rows="12"
               placeholder="Напишите текст вашей статьи..."
             ></textarea>
-            <div v-if="errors.text" class="invalid-feedback">{{ errors.text }}</div>
+            <div v-if="errors.text" class="invalid-feedback">
+              {{ errors.text }}
+            </div>
           </div>
-          
+
           <div class="mb-3 d-flex gap-2">
-            <button type="submit" class="btn btn-primary" :disabled="submitting">
-              {{ submitting ? 'Сохранение...' : 'Сохранить изменения' }}
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :disabled="submitting"
+            >
+              {{ submitting ? "Сохранение..." : "Сохранить изменения" }}
             </button>
-            <router-link :to="`/articles/${articleId}`" class="btn btn-secondary">Отмена</router-link>
-            <button type="button" @click="deleteArticle" class="btn btn-danger ms-auto">
+            <router-link
+              :to="`/articles/${articleId}`"
+              class="btn btn-secondary"
+              >Отмена</router-link
+            >
+            <button
+              type="button"
+              @click="deleteArticle"
+              class="btn btn-danger ms-auto"
+            >
               Удалить статью
             </button>
           </div>
@@ -85,128 +111,131 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { articleService } from '@/services/articles'
+import { ref, reactive, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { articleService } from "@/services/articles";
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
-const articleId = route.params.id
+const articleId = route.params.id;
 const form = reactive({
-  title: '',
-  category: '',
-  newCategory: '',
-  text: ''
-})
+  title: "",
+  category: "",
+  newCategory: "",
+  text: "",
+});
 
-const errors = ref({})
-const loading = ref(true)
-const submitting = ref(false)
-const message = ref('')
-const messageType = ref('')
+const errors = ref({});
+const loading = ref(true);
+const submitting = ref(false);
+const message = ref("");
+const messageType = ref("");
 
 const fetchArticle = async () => {
   try {
-    loading.value = true
-    const response = await articleService.getArticle(articleId)
-    
+    loading.value = true;
+    const response = await articleService.getArticle(articleId);
+
     if (response.success) {
-      const article = response.article
-      form.title = article.title
-      form.category = article.category
-      form.text = article.text
+      const article = response.article;
+      form.title = article.title;
+      form.category = article.category;
+      form.text = article.text;
     } else {
-      throw new Error(response.error || 'Статья не найдена')
+      throw new Error(response.error || "Статья не найдена");
     }
   } catch (error) {
-    message.value = error.response?.data?.error || 'Ошибка загрузки статьи'
-    messageType.value = 'danger'
+    message.value = error.response?.data?.error || "Ошибка загрузки статьи";
+    messageType.value = "danger";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const validateForm = () => {
-  errors.value = {}
+  errors.value = {};
 
   if (!form.title) {
-    errors.value.title = 'Обязательно введите заголовок'
+    errors.value.title = "Обязательно введите заголовок";
   }
 
   if (!form.category && !form.newCategory) {
-    errors.value.category = 'Обязательно выберите или введите категорию'
+    errors.value.category = "Обязательно выберите или введите категорию";
   }
 
   if (!form.text) {
-    errors.value.text = 'Обязательно введите текст статьи'
+    errors.value.text = "Обязательно введите текст статьи";
   }
 
-  return Object.keys(errors.value).length === 0
-}
+  return Object.keys(errors.value).length === 0;
+};
 
 const handleSubmit = async () => {
   if (!validateForm()) {
-    return
+    return;
   }
 
-  submitting.value = true
-  message.value = ''
+  submitting.value = true;
+  message.value = "";
 
   try {
     const articleData = {
       title: form.title,
       text: form.text,
-      category: form.newCategory || form.category
-    }
+      category: form.newCategory || form.category,
+    };
 
-    const response = await articleService.updateArticle(articleId, articleData)
-    
-    message.value = 'Статья успешно обновлена!'
-    messageType.value = 'success'
-    
+    const response = await articleService.updateArticle(articleId, articleData);
+
+    message.value = "Статья успешно обновлена!";
+    messageType.value = "success";
+
     setTimeout(() => {
-      router.push(`/articles/${articleId}`)
-    }, 1000)
-
+      router.push(`/articles/${articleId}`);
+    }, 1000);
   } catch (error) {
-    message.value = error.response?.data?.error || 'Ошибка обновления статьи'
-    messageType.value = 'danger'
+    message.value = error.response?.data?.error || "Ошибка обновления статьи";
+    messageType.value = "danger";
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 
 const deleteArticle = async () => {
-  if (!confirm('Вы уверены, что хотите удалить эту статью? Это действие нельзя отменить.')) {
-    return
+  if (
+    !confirm(
+      "Вы уверены, что хотите удалить эту статью? Это действие нельзя отменить."
+    )
+  ) {
+    return;
   }
 
   try {
-    submitting.value = true
-    const response = await articleService.deleteArticle(articleId)
-    
+    submitting.value = true;
+    const response = await articleService.deleteArticle(articleId);
+
     if (response.success) {
-      message.value = 'Статья успешно удалена!'
-      messageType.value = 'success'
-      
+      message.value = "Статья успешно удалена!";
+      messageType.value = "success";
+
       setTimeout(() => {
-        router.push('/')
-      }, 1500)
+        router.push("/");
+      }, 1500);
     } else {
-      throw new Error(response.error || 'Ошибка при удалении статьи')
+      throw new Error(response.error || "Ошибка при удалении статьи");
     }
   } catch (error) {
-    message.value = error.response?.data?.error || 'Ошибка удаления статьи'
-    messageType.value = 'danger'
+    message.value = error.response?.data?.error || "Ошибка удаления статьи";
+    messageType.value = "danger";
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 
 onMounted(() => {
-  fetchArticle()
-})
+  fetchArticle();
+});
 </script>
 
 <style scoped>
@@ -242,7 +271,7 @@ p {
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
 }
 
@@ -395,24 +424,24 @@ textarea.form-control {
   .container {
     padding: 0 1rem;
   }
-  
+
   .form-list {
     padding: 2rem 1.5rem;
   }
-  
+
   h1 {
     font-size: 2rem;
   }
-  
+
   .d-flex.gap-2 {
     flex-direction: column;
   }
-  
+
   .btn {
     width: 100%;
     margin-bottom: 1rem;
   }
-  
+
   .ms-auto {
     margin-left: 0;
   }
@@ -422,11 +451,11 @@ textarea.form-control {
   .form-list {
     padding: 1.5rem 1rem;
   }
-  
+
   h1 {
     font-size: 1.75rem;
   }
-  
+
   .form-control {
     padding: 0.875rem;
   }

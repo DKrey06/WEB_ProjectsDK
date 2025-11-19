@@ -4,7 +4,15 @@
       <h1>Создание новой статьи</h1>
       <p>Заполните форму для создания статьи</p>
 
-      <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger', 'alert-dismissible fade show']" role="alert">
+      <div
+        v-if="message"
+        :class="[
+          'alert',
+          messageType === 'success' ? 'alert-success' : 'alert-danger',
+          'alert-dismissible fade show',
+        ]"
+        role="alert"
+      >
         {{ message }}
         <button type="button" class="btn-close" @click="message = ''"></button>
       </div>
@@ -13,21 +21,23 @@
         <div class="form-list">
           <div class="mb-3">
             <label class="form-label">Заголовок статьи:</label>
-            <input 
-              class="form-control" 
+            <input
+              class="form-control"
               :class="{ 'is-invalid': errors.title }"
-              type="text" 
+              type="text"
               v-model="form.title"
               maxlength="200"
               placeholder="Введите заголовок статьи"
-            >
-            <div v-if="errors.title" class="invalid-feedback">{{ errors.title }}</div>
+            />
+            <div v-if="errors.title" class="invalid-feedback">
+              {{ errors.title }}
+            </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Категория:</label>
-            <select 
-              class="form-control" 
+            <select
+              class="form-control"
               :class="{ 'is-invalid': errors.category }"
               v-model="form.category"
             >
@@ -38,33 +48,37 @@
               <option value="Наука">Наука</option>
               <option value="Спорт">Спорт</option>
             </select>
-            <div v-if="errors.category" class="invalid-feedback">{{ errors.category }}</div>
+            <div v-if="errors.category" class="invalid-feedback">
+              {{ errors.category }}
+            </div>
             <div class="form-text">
               Или введите новую категорию:
-              <input 
-                type="text" 
-                class="form-control" 
-                v-model="form.newCategory" 
+              <input
+                type="text"
+                class="form-control"
+                v-model="form.newCategory"
                 placeholder="Введите новую категорию"
-              >
+              />
             </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Текст статьи:</label>
-            <textarea 
-              class="form-control" 
+            <textarea
+              class="form-control"
               :class="{ 'is-invalid': errors.text }"
               v-model="form.text"
               rows="12"
               placeholder="Напишите текст вашей статьи..."
             ></textarea>
-            <div v-if="errors.text" class="invalid-feedback">{{ errors.text }}</div>
+            <div v-if="errors.text" class="invalid-feedback">
+              {{ errors.text }}
+            </div>
           </div>
-          
+
           <div class="mb-3">
             <button type="submit" class="btn btn-primary" :disabled="loading">
-              {{ loading ? 'Создание...' : 'Создать статью' }}
+              {{ loading ? "Создание..." : "Создать статью" }}
             </button>
             <router-link to="/" class="btn btn-secondary">Отмена</router-link>
           </div>
@@ -75,75 +89,74 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { articleService } from '@/services/articles'
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+import { articleService } from "@/services/articles";
 
-const router = useRouter()
-const authStore = useAuthStore()
+const router = useRouter();
+const authStore = useAuthStore();
 
 const form = reactive({
-  title: '',
-  category: '',
-  newCategory: '',
-  text: ''
-})
+  title: "",
+  category: "",
+  newCategory: "",
+  text: "",
+});
 
-const errors = ref({})
-const loading = ref(false)
-const message = ref('')
-const messageType = ref('')
+const errors = ref({});
+const loading = ref(false);
+const message = ref("");
+const messageType = ref("");
 
 const validateForm = () => {
-  errors.value = {}
+  errors.value = {};
 
   if (!form.title) {
-    errors.value.title = 'Обязательно введите заголовок'
+    errors.value.title = "Обязательно введите заголовок";
   }
 
   if (!form.category && !form.newCategory) {
-    errors.value.category = 'Обязательно выберите или введите категорию'
+    errors.value.category = "Обязательно выберите или введите категорию";
   }
 
   if (!form.text) {
-    errors.value.text = 'Обязательно введите текст статьи'
+    errors.value.text = "Обязательно введите текст статьи";
   }
 
-  return Object.keys(errors.value).length === 0
-}
+  return Object.keys(errors.value).length === 0;
+};
 
 const handleSubmit = async () => {
   if (!validateForm()) {
-    return
+    return;
   }
 
-  loading.value = true
-  message.value = ''
+  loading.value = true;
+  message.value = "";
 
   try {
     const articleData = {
       title: form.title,
       text: form.text,
-      category: form.newCategory || form.category
-    }
+      category: form.newCategory || form.category,
+    };
 
-    const response = await articleService.createArticle(articleData)
-    
-    message.value = 'Статья успешно создана!'
-    messageType.value = 'success'
-    
+    const response = await articleService.createArticle(articleData);
+
+    message.value = "Статья успешно создана!";
+    messageType.value = "success";
+
     setTimeout(() => {
-      router.push(`/articles/${response.article.id}`)
-    }, 1000)
-
+      router.push(`/articles/${response.article.id}`);
+    }, 1000);
   } catch (error) {
-    message.value = error.response?.data?.error || 'Ошибка создания статьи'
-    messageType.value = 'danger'
+    message.value = error.response?.data?.error || "Ошибка создания статьи";
+    messageType.value = "danger";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
@@ -179,7 +192,7 @@ p {
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
 }
 
@@ -315,15 +328,15 @@ textarea.form-control {
   .container {
     padding: 0 1rem;
   }
-  
+
   .form-list {
     padding: 2rem 1.5rem;
   }
-  
+
   h1 {
     font-size: 2rem;
   }
-  
+
   .btn {
     width: 100%;
     margin-right: 0;
@@ -335,11 +348,11 @@ textarea.form-control {
   .form-list {
     padding: 1.5rem 1rem;
   }
-  
+
   h1 {
     font-size: 1.75rem;
   }
-  
+
   .form-control {
     padding: 0.875rem;
   }

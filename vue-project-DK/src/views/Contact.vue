@@ -3,19 +3,27 @@
     <div class="container">
       <h1>Наши контакты</h1>
       <p class="page-subtitle">Свяжитесь с нами удобным для вас способом</p>
-      
+
       <div class="contacts-container">
         <div class="contacts-box">
           <div class="contacts-header">
             <h2>Мы в социальных сетях</h2>
             <p>Подписывайтесь и будьте в курсе новостей</p>
           </div>
-          
+
           <ul class="contacts-list">
             <li>
-              <a href="https://t.me/DKrey_06" target="_blank" class="contact-link">
+              <a
+                href="https://t.me/DKrey_06"
+                target="_blank"
+                class="contact-link"
+              >
                 <div class="contact-icon telegram-icon">
-                  <img src="/images/telegram-icon.png" alt="Telegram" class="icon-image">
+                  <img
+                    src="/images/telegram-icon.png"
+                    alt="Telegram"
+                    class="icon-image"
+                  />
                 </div>
                 <div class="contact-info">
                   <span class="contact-name">Telegram</span>
@@ -25,9 +33,13 @@
               </a>
             </li>
             <li>
-              <a href="https://vk.com/dkrey_06" target="_blank" class="contact-link">
+              <a
+                href="https://vk.com/dkrey_06"
+                target="_blank"
+                class="contact-link"
+              >
                 <div class="contact-icon vk-icon">
-                  <img src="/images/vk-icon.png" alt="VK" class="icon-image">
+                  <img src="/images/vk-icon.png" alt="VK" class="icon-image" />
                 </div>
                 <div class="contact-info">
                   <span class="contact-name">VK</span>
@@ -37,9 +49,17 @@
               </a>
             </li>
             <li>
-              <a href="https://github.com/DKrey06" target="_blank" class="contact-link">
+              <a
+                href="https://github.com/DKrey06"
+                target="_blank"
+                class="contact-link"
+              >
                 <div class="contact-icon github-icon">
-                  <img src="/images/github-icon.png" alt="GitHub" class="icon-image">
+                  <img
+                    src="/images/github-icon.png"
+                    alt="GitHub"
+                    class="icon-image"
+                  />
                 </div>
                 <div class="contact-info">
                   <span class="contact-name">GitHub</span>
@@ -51,14 +71,21 @@
             <li>
               <a class="contact-link" @click="copyEmail">
                 <div class="contact-icon email-icon">
-                  <img src="/images/email-icon.png" alt="Email" class="icon-image">
+                  <img
+                    src="/images/email-icon.png"
+                    alt="Email"
+                    class="icon-image"
+                  />
                 </div>
                 <div class="contact-info">
                   <span class="contact-name">Email</span>
                   <span class="contact-handle">mrdmitry2006@mail.ru</span>
                 </div>
-                <span class="contact-arrow" :class="{ 'copied': showCopiedMessage }">
-                  {{ showCopiedMessage ? '✓' : '→' }}
+                <span
+                  class="contact-arrow"
+                  :class="{ copied: showCopiedMessage }"
+                >
+                  {{ showCopiedMessage ? "✓" : "→" }}
                 </span>
               </a>
               <div v-if="showCopiedMessage" class="copied-message">
@@ -73,31 +100,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref } from "vue";
 
-const showCopiedMessage = ref(false)
+const showCopiedMessage = ref(false);
 
 const copyEmail = async () => {
   try {
-    await navigator.clipboard.writeText('mrdmitry2006@mail.ru')
-    showCopiedMessage.value = true
+    await navigator.clipboard.writeText("mrdmitry2006@mail.ru");
+    showCopiedMessage.value = true;
     setTimeout(() => {
-      showCopiedMessage.value = false
-    }, 2000)
+      showCopiedMessage.value = false;
+    }, 2000);
   } catch (err) {
-    console.error('Ошибка копирования: ', err)
-    const textArea = document.createElement('textarea')
-    textArea.value = 'mrdmitry2006@mail.ru'
-    document.body.appendChild(textArea)
-    textArea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textArea)
-    showCopiedMessage.value = true
+    console.error("Ошибка копирования: ", err);
+    const textArea = document.createElement("textarea");
+    textArea.value = "mrdmitry2006@mail.ru";
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+    showCopiedMessage.value = true;
     setTimeout(() => {
-      showCopiedMessage.value = false
-    }, 2000)
+      showCopiedMessage.value = false;
+    }, 2000);
   }
-}
+};
 </script>
 
 <style scoped>
@@ -138,7 +165,7 @@ h1 {
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
 }
 
@@ -300,20 +327,20 @@ h1 {
   .container {
     padding: 0 1rem;
   }
-  
+
   .contacts-box {
     padding: 2rem 1.5rem;
   }
-  
+
   h1 {
     font-size: 2rem;
   }
-  
+
   .contact-icon {
     width: 48px;
     height: 48px;
   }
-  
+
   .icon-image {
     width: 28px;
     height: 28px;
@@ -324,24 +351,24 @@ h1 {
   .contacts-box {
     padding: 1.5rem 1rem;
   }
-  
+
   .contact-link {
     gap: 0.75rem;
   }
-  
+
   .contact-name {
     font-size: 1rem;
   }
-  
+
   .contact-handle {
     font-size: 0.8rem;
   }
-  
+
   .contact-icon {
     width: 44px;
     height: 44px;
   }
-  
+
   .icon-image {
     width: 24px;
     height: 24px;

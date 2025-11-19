@@ -3,12 +3,16 @@
     <div class="container">
       <div class="success-container">
         <div class="success-icon">
-          <img src="/images/cat.png" alt="Кошачий успех" class="success-image">
+          <img
+            src="/images/cat.png"
+            alt="Кошачий успех"
+            class="success-image"
+          />
         </div>
         <h1>Сообщение отправлено!</h1>
         <p class="success-subtitle">
-          Спасибо за ваше сообщение, <strong>{{ feedbackData.username }}</strong>! 
-          Мы свяжемся с вами в ближайшее время.
+          Спасибо за ваше сообщение, <strong>{{ feedbackData.username }}</strong
+          >! Мы свяжемся с вами в ближайшее время.
         </p>
       </div>
 
@@ -60,24 +64,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 
-const route = useRoute()
+const route = useRoute();
 
 const feedbackData = ref({
-  username: '',
-  usermail: '',
-  textmess: ''
-})
+  username: "",
+  usermail: "",
+  textmess: "",
+});
 
 onMounted(() => {
   feedbackData.value = {
-    username: route.query.username || '',
-    usermail: route.query.usermail || '',
-    textmess: route.query.textmess || ''
-  }
-})
+    username: route.query.username || "",
+    usermail: route.query.usermail || "",
+    textmess: route.query.textmess || "",
+  };
+});
 </script>
 
 <style scoped>
@@ -97,7 +101,7 @@ onMounted(() => {
   background: white;
   padding: 3rem 2rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
   text-align: center;
   margin-bottom: 2rem;
@@ -115,7 +119,11 @@ onMounted(() => {
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -148,7 +156,7 @@ onMounted(() => {
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
   margin-bottom: 2rem;
 }
@@ -276,38 +284,38 @@ onMounted(() => {
   .container {
     padding: 0 1rem;
   }
-  
+
   .success-container {
     padding: 2rem 1.5rem;
   }
-  
+
   .feedback-summary {
     padding: 2rem 1.5rem;
   }
-  
+
   .success-container h1 {
     font-size: 2rem;
   }
-  
+
   .success-image {
     width: 70px;
     height: 70px;
   }
-  
+
   .summary-item {
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .summary-label {
     min-width: auto;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .btn {
     width: 100%;
     max-width: 300px;
@@ -319,24 +327,24 @@ onMounted(() => {
   .success-container {
     padding: 1.5rem 1rem;
   }
-  
+
   .feedback-summary {
     padding: 1.5rem 1rem;
   }
-  
+
   .success-container h1 {
     font-size: 1.75rem;
   }
-  
+
   .success-image {
     width: 60px;
     height: 60px;
   }
-  
+
   .summary-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .message-content {
     padding: 1rem;
   }

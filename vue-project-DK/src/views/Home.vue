@@ -7,12 +7,16 @@
 
     <div class="container">
       <h2>Последние статьи</h2>
-      
+
       <div v-if="loading" class="loading">Загрузка...</div>
-      
+
       <div v-else-if="articles.length === 0" class="no-articles">
         <p>Пока нет статей</p>
-        <router-link v-if="authStore.isAuthenticated" to="/create-article" class="btn-primary">
+        <router-link
+          v-if="authStore.isAuthenticated"
+          to="/create-article"
+          class="btn-primary"
+        >
           Создать первую статью
         </router-link>
       </div>
@@ -40,16 +44,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useAuthStore } from '@/stores/auth';
-import { articleService } from '@/services/articles';
+import { ref, onMounted } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { articleService } from "@/services/articles";
 
 const articles = ref([]);
 const loading = ref(true);
 const authStore = useAuthStore();
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('ru-RU');
+  return new Date(dateString).toLocaleDateString("ru-RU");
 };
 
 const isNewArticle = (article) => {
@@ -66,7 +70,7 @@ const fetchArticles = async () => {
     const response = await articleService.getArticles();
     articles.value = response.articles.slice(0, 6);
   } catch (error) {
-    console.error('Ошибка загрузки статей:', error);
+    console.error("Ошибка загрузки статей:", error);
     articles.value = [];
   } finally {
     loading.value = false;
@@ -119,7 +123,7 @@ onMounted(() => {
   background: white;
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   display: flex;
   flex-direction: column;
@@ -129,7 +133,7 @@ onMounted(() => {
 
 .article-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
 .article-header {
@@ -243,33 +247,33 @@ onMounted(() => {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .article-card {
     padding: 1.25rem;
   }
-  
+
   .article-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .new-badge {
     align-self: flex-start;
   }
-  
+
   .hero {
     padding: 3rem 1rem;
   }
-  
+
   .hero h1 {
     font-size: 2rem;
   }
-  
+
   .hero p {
     font-size: 1.1rem;
   }
-  
+
   .home {
     padding-bottom: 2rem;
   }

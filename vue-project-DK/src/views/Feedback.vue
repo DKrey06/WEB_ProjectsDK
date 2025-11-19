@@ -4,7 +4,15 @@
       <h1>Обратная связь</h1>
       <p class="page-subtitle">Мы ценим ваше мнение и всегда готовы помочь</p>
 
-      <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger', 'alert-dismissible fade show']" role="alert">
+      <div
+        v-if="message"
+        :class="[
+          'alert',
+          messageType === 'success' ? 'alert-success' : 'alert-danger',
+          'alert-dismissible fade show',
+        ]"
+        role="alert"
+      >
         {{ message }}
         <button type="button" class="btn-close" @click="message = ''"></button>
       </div>
@@ -19,47 +27,53 @@
           <form @submit.prevent="handleSubmit" class="feedback-form">
             <div class="form-group">
               <label class="form-label">Ваше имя:</label>
-              <input 
-                class="form-control" 
+              <input
+                class="form-control"
                 :class="{ 'is-invalid': errors.username }"
-                type="text" 
+                type="text"
                 v-model="form.username"
                 maxlength="30"
                 placeholder="Введите ваше имя"
-              >
-              <div v-if="errors.username" class="invalid-feedback">{{ errors.username }}</div>
+              />
+              <div v-if="errors.username" class="invalid-feedback">
+                {{ errors.username }}
+              </div>
             </div>
-            
+
             <div class="form-group">
               <label class="form-label">Электронная почта:</label>
-              <input 
-                class="form-control" 
+              <input
+                class="form-control"
                 :class="{ 'is-invalid': errors.usermail }"
-                type="email" 
+                type="email"
                 v-model="form.usermail"
                 maxlength="50"
                 placeholder="Введите ваш email"
-              >
-              <div v-if="errors.usermail" class="invalid-feedback">{{ errors.usermail }}</div>
+              />
+              <div v-if="errors.usermail" class="invalid-feedback">
+                {{ errors.usermail }}
+              </div>
             </div>
-            
+
             <div class="form-group">
               <label class="form-label">Текст сообщения:</label>
-              <textarea 
-                class="form-control" 
+              <textarea
+                class="form-control"
                 :class="{ 'is-invalid': errors.textmess }"
                 v-model="form.textmess"
                 rows="6"
                 placeholder="Опишите ваш вопрос или предложение..."
               ></textarea>
-              <div v-if="errors.textmess" class="invalid-feedback">{{ errors.textmess }}</div>
+              <div v-if="errors.textmess" class="invalid-feedback">
+                {{ errors.textmess }}
+              </div>
               <div class="form-text">Максимум 1000 символов</div>
             </div>
-            
+
             <div class="form-actions">
               <button type="submit" class="btn btn-primary" :disabled="loading">
                 <span v-if="loading" class="spinner"></span>
-                {{ loading ? 'Отправка...' : 'Отправить сообщение' }}
+                {{ loading ? "Отправка..." : "Отправить сообщение" }}
               </button>
             </div>
           </form>
@@ -70,80 +84,80 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
 
-const router = useRouter()
+const router = useRouter();
 
 const form = reactive({
-  username: '',
-  usermail: '',
-  textmess: ''
-})
+  username: "",
+  usermail: "",
+  textmess: "",
+});
 
-const errors = ref({})
-const loading = ref(false)
-const message = ref('')
-const messageType = ref('')
+const errors = ref({});
+const loading = ref(false);
+const message = ref("");
+const messageType = ref("");
 
 const validateForm = () => {
-  errors.value = {}
+  errors.value = {};
 
   if (!form.username.trim()) {
-    errors.value.username = 'Обязательно введите имя'
+    errors.value.username = "Обязательно введите имя";
   } else if (form.username.trim().length < 2) {
-    errors.value.username = 'Имя должно содержать минимум 2 символа'
+    errors.value.username = "Имя должно содержать минимум 2 символа";
   }
 
   if (!form.usermail.trim()) {
-    errors.value.usermail = 'Обязательно введите email'
+    errors.value.usermail = "Обязательно введите email";
   } else {
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailPattern.test(form.usermail)) {
-      errors.value.usermail = 'Введите корректный email адрес'
+      errors.value.usermail = "Введите корректный email адрес";
     }
   }
 
   if (!form.textmess.trim()) {
-    errors.value.textmess = 'Обязательно введите сообщение'
+    errors.value.textmess = "Обязательно введите сообщение";
   } else if (form.textmess.length > 1000) {
-    errors.value.textmess = 'Сообщение не должно превышать 1000 символов'
+    errors.value.textmess = "Сообщение не должно превышать 1000 символов";
   }
 
-  return Object.keys(errors.value).length === 0
-}
+  return Object.keys(errors.value).length === 0;
+};
 
 const handleSubmit = async () => {
   if (!validateForm()) {
-    return
+    return;
   }
 
-  loading.value = true
+  loading.value = true;
 
   try {
     setTimeout(() => {
-      message.value = 'Сообщение успешно отправлено! Спасибо за обратную связь.'
-      messageType.value = 'success'
-      loading.value = false
+      message.value =
+        "Сообщение успешно отправлено! Спасибо за обратную связь.";
+      messageType.value = "success";
+      loading.value = false;
 
       setTimeout(() => {
         router.push({
-          name: 'post-feedback',
+          name: "post-feedback",
           query: {
             username: form.username,
             usermail: form.usermail,
-            textmess: form.textmess
-          }
-        })
-      }, 1000)
-    }, 1000)
-
+            textmess: form.textmess,
+          },
+        });
+      }, 1000);
+    }, 1000);
   } catch (error) {
-    message.value = 'Ошибка при отправке сообщения'
-    messageType.value = 'danger'
-    loading.value = false
+    message.value = "Ошибка при отправке сообщения";
+    messageType.value = "danger";
+    loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
@@ -184,7 +198,7 @@ h1 {
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
   width: 100%;
   max-width: 600px;
@@ -317,8 +331,12 @@ textarea.form-control {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .alert {
@@ -348,11 +366,11 @@ textarea.form-control {
   .container {
     padding: 0 1rem;
   }
-  
+
   .feedback-box {
     padding: 2rem 1.5rem;
   }
-  
+
   h1 {
     font-size: 2rem;
   }
@@ -362,11 +380,11 @@ textarea.form-control {
   .feedback-box {
     padding: 1.5rem 1rem;
   }
-  
+
   .form-control {
     padding: 0.875rem;
   }
-  
+
   .btn {
     padding: 0.875rem 1.5rem;
     min-width: auto;

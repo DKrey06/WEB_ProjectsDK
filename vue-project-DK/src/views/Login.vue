@@ -7,48 +7,73 @@
             <div class="card-body">
               <h1 class="card-title">Вход в систему</h1>
 
-              <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger', 'alert-dismissible fade show']" role="alert">
+              <div
+                v-if="message"
+                :class="[
+                  'alert',
+                  messageType === 'success' ? 'alert-success' : 'alert-danger',
+                  'alert-dismissible fade show',
+                ]"
+                role="alert"
+              >
                 {{ message }}
-                <button type="button" class="btn-close" @click="message = ''"></button>
+                <button
+                  type="button"
+                  class="btn-close"
+                  @click="message = ''"
+                ></button>
               </div>
 
               <form @submit.prevent="handleLogin">
                 <div class="mb-3">
                   <label class="form-label">Email:</label>
-                  <input 
-                    class="form-control" 
+                  <input
+                    class="form-control"
                     :class="{ 'is-invalid': errors.email }"
-                    type="email" 
+                    type="email"
                     v-model="form.email"
                     maxlength="100"
                     placeholder="Введите ваш email"
-                  >
-                  <div v-if="errors.email" class="invalid-feedback">{{ errors.email }}</div>
+                  />
+                  <div v-if="errors.email" class="invalid-feedback">
+                    {{ errors.email }}
+                  </div>
                 </div>
 
                 <div class="mb-3">
                   <label class="form-label">Пароль:</label>
-                  <input 
-                    class="form-control" 
+                  <input
+                    class="form-control"
                     :class="{ 'is-invalid': errors.password }"
-                    type="password" 
+                    type="password"
                     v-model="form.password"
                     placeholder="Введите ваш пароль"
-                  >
-                  <div v-if="errors.password" class="invalid-feedback">{{ errors.password }}</div>
+                  />
+                  <div v-if="errors.password" class="invalid-feedback">
+                    {{ errors.password }}
+                  </div>
                 </div>
 
-                <div v-if="errors.login" class="alert alert-danger">{{ errors.login }}</div>
+                <div v-if="errors.login" class="alert alert-danger">
+                  {{ errors.login }}
+                </div>
 
                 <div class="d-grid">
-                  <button type="submit" class="btn btn-primary" :disabled="loading">
-                    {{ loading ? 'Вход...' : 'Войти' }}
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="loading"
+                  >
+                    {{ loading ? "Вход..." : "Войти" }}
                   </button>
                 </div>
               </form>
 
               <div class="text-center">
-                <p>Нет аккаунта? <router-link to="/register">Зарегистрируйтесь</router-link></p>
+                <p>
+                  Нет аккаунта?
+                  <router-link to="/register">Зарегистрируйтесь</router-link>
+                </p>
               </div>
             </div>
           </div>
@@ -59,60 +84,60 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 
-const router = useRouter()
-const authStore = useAuthStore()
+const router = useRouter();
+const authStore = useAuthStore();
 
 const form = reactive({
-  email: '',
-  password: ''
-})
+  email: "",
+  password: "",
+});
 
-const errors = ref({})
-const loading = ref(false)
-const message = ref('')
-const messageType = ref('')
+const errors = ref({});
+const loading = ref(false);
+const message = ref("");
+const messageType = ref("");
 
 const handleLogin = async () => {
-  errors.value = {}
-  loading.value = true
-  message.value = ''
+  errors.value = {};
+  loading.value = true;
+  message.value = "";
 
   if (!form.email) {
-    errors.value.email = 'Обязательно введите email'
+    errors.value.email = "Обязательно введите email";
   }
   if (!form.password) {
-    errors.value.password = 'Обязательно введите пароль'
+    errors.value.password = "Обязательно введите пароль";
   }
 
   if (Object.keys(errors.value).length > 0) {
-    loading.value = false
-    return
+    loading.value = false;
+    return;
   }
 
   try {
-    const result = await authStore.login(form)
-    
+    const result = await authStore.login(form);
+
     if (result.success) {
-      message.value = 'Успешный вход!'
-      messageType.value = 'success'
+      message.value = "Успешный вход!";
+      messageType.value = "success";
       setTimeout(() => {
-        router.push('/')
-      }, 1000)
+        router.push("/");
+      }, 1000);
     } else {
-      errors.value.login = result.error || 'Ошибка входа'
-      messageType.value = 'danger'
+      errors.value.login = result.error || "Ошибка входа";
+      messageType.value = "danger";
     }
   } catch (error) {
-    errors.value.login = 'Ошибка сервера'
-    messageType.value = 'danger'
+    errors.value.login = "Ошибка сервера";
+    messageType.value = "danger";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
@@ -133,7 +158,7 @@ const handleLogin = async () => {
 .card {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   border: none;
   overflow: hidden;
 }
@@ -276,11 +301,11 @@ form {
   .card-body {
     padding: 2rem 1.5rem;
   }
-  
+
   .card-title {
     font-size: 1.5rem;
   }
-  
+
   .container {
     padding: 0 0.5rem;
   }

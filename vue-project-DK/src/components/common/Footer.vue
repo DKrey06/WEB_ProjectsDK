@@ -4,18 +4,17 @@
       <div class="footer-content">
         <div class="footer-text">
           <p>© 2025 NEWS_DK</p>
-          <p class="footer-author"> @DKREY_06</p>
+          <p class="footer-author">@DKREY_06</p>
         </div>
         <div class="footer-image">
-          <img src="/images/CatQ.png" alt="Cat" class="footer-cat">
+          <img src="/images/CatQ.png" alt="Cat" class="footer-cat" />
         </div>
       </div>
     </div>
   </footer>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
 <style scoped>
 .footer {
@@ -69,23 +68,22 @@
   transform: scale(1.1);
 }
 
-
 @media (max-width: 768px) {
   .footer {
     padding: 1.5rem 0;
   }
-  
+
   .footer-content {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
   }
-  
+
   .footer-cat {
     width: 50px;
     height: 50px;
   }
-  
+
   .container {
     padding: 0 1rem;
   }
@@ -95,11 +93,11 @@
   .footer {
     padding: 1rem 0;
   }
-  
+
   .footer-text p {
     font-size: 0.9rem;
   }
-  
+
   .footer-cat {
     width: 40px;
     height: 40px;
