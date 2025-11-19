@@ -48,7 +48,8 @@
 
 <style scoped>
 .about-page {
-  padding: 2rem 0;
+  padding: 2rem 5rem;
+  
 }
 
 .container {

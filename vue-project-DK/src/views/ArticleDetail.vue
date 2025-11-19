@@ -1,15 +1,7 @@
 <template>
   <div class="article-detail">
     <div class="container mt-4">
-      <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item">
-            <router-link to="/" class="text-decoration-none">Главная</router-link>
-          </li>
-          <li class="breadcrumb-item active">{{ article?.title }}</li>
-        </ol>
-      </nav>
-
+      
       <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger', 'alert-dismissible fade show']" role="alert">
         {{ message }}
         <button type="button" class="btn-close" @click="clearMessage"></button>
@@ -17,14 +9,24 @@
 
       <article class="news-detail" v-if="article">
         <header class="mb-4 pb-3 border-bottom">
-          <div class="d-flex justify-content-between align-items-start">
-            <h1 class="display-6 mb-2">{{ article.title }}</h1>
-            <span v-if="isNewArticle" class="badge bg-success ms-3 new-badge">НОВОЕ</span>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h1 class="display-6 mb-0 flex-grow-1">{{ article.title }}</h1>
+            <div class="d-flex align-items-center gap-2 ms-3">
+              <span v-if="isNewArticle" class="badge bg-success new-badge">НОВОЕ</span>
+              <div v-if="authStore.isAuthenticated" class="article-actions">
+                <button @click="editArticle" class="btn btn-warning btn-sm">
+                  ✏️ Редактировать
+                </button>
+                <button @click="deleteArticle" class="btn btn-danger btn-sm">
+                  🗑️ Удалить
+                </button>
+              </div>
+            </div>
           </div>
-          <p class="text-muted mb-0">
+          <p class="text-muted mb-1">
             📅 Опубликовано: {{ formatDate(article.created_date) }}
           </p>
-          <p class="text-muted mb-0">Автор: {{ article.author_name || article.author }}</p>
+          <p class="text-muted mb-1">Автор: {{ article.author_name || article.author }}</p>
           <p class="text-muted mb-0">Категория: {{ article.category }}</p>
         </header>
 
@@ -89,7 +91,7 @@
                   <small class="text-muted">{{ formatDate(comment.date) }}</small>
                 </div>
                 <p class="card-text">{{ comment.text }}</p>
-                <div v-if="canEditComment(comment)" class="mt-2">
+                <div v-if="authStore.isAuthenticated && authStore.user?.id === comment.user_id" class="mt-2">
                   <button @click="editComment(comment)" class="btn btn-sm btn-outline-warning me-2" :disabled="commentLoading">
                     Редактировать
                   </button>
@@ -105,15 +107,10 @@
           </div>
         </div>
 
-        <div class="mt-5 pt-3 border-top d-flex justify-content-between">
+        <div class="mt-5 pt-3 border-top">
           <router-link to="/" class="btn btn-secondary">
-            ← Вернуться
+            ← Вернуться на главную
           </router-link>
-          <div v-if="canEditArticle">
-            <button @click="editArticle" class="btn btn-warning">
-              Редактировать статью
-            </button>
-          </div>
         </div>
       </article>
 
@@ -166,14 +163,6 @@ const isNewArticle = computed(() => {
   return diffDays < 1
 })
 
-const canEditArticle = computed(() => {
-  return authStore.isAuthenticated && article.value && authStore.user?.id === article.value.author_id
-})
-
-const canEditComment = (comment) => {
-  return authStore.isAuthenticated && authStore.user?.id === comment.user_id
-}
-
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -215,7 +204,6 @@ const fetchArticle = async () => {
       throw new Error(response.error || 'Статья не найдена')
     }
   } catch (error) {
-    console.error('Ошибка загрузки статьи:', error)
     showMessage(error.response?.data?.error || error.message || 'Статья не найдена', 'danger')
   } finally {
     loading.value = false
@@ -237,8 +225,6 @@ const fetchComments = async () => {
       throw new Error(response.error || 'Ошибка загрузки комментариев')
     }
   } catch (error) {
-    console.error('Ошибка загрузки комментариев:', error)
-    console.error('Детали ошибки:', error.response?.data)
     comments.value = []
   } finally {
     commentsLoading.value = false
@@ -266,8 +252,6 @@ const addComment = async () => {
       text: commentForm.text.trim()
     }
 
-    console.log('Отправка комментария:', commentData)
-
     const response = await commentService.createComment(commentData)
     
     if (response.success) {
@@ -278,14 +262,7 @@ const addComment = async () => {
       throw new Error(response.error || 'Ошибка при создании комментария')
     }
   } catch (error) {
-    console.error('Ошибка при добавлении комментария:', error)
-    console.error('Детали ошибки:', error.response?.data)
-    
-    if (error.response?.data?.errors) {
-      errors.value = error.response.data.errors
-    } else {
-      showMessage(error.response?.data?.error || error.message || 'Ошибка при добавлении комментария', 'danger')
-    }
+    showMessage(error.response?.data?.error || error.message || 'Ошибка при добавлении комментария', 'danger')
   } finally {
     commentLoading.value = false
   }
@@ -307,8 +284,7 @@ const editComment = async (comment) => {
         throw new Error(response.error || 'Ошибка при обновлении комментария')
       }
     } catch (error) {
-      console.error('Ошибка при обновлении комментария:', error)
-      showMessage(error.response?.data?.error || error.message || 'Ошибка при обновлении комментария', 'danger')
+      showMessage('Ошибка при редактировании комментария', 'danger')
     } finally {
       commentLoading.value = false
     }
@@ -331,8 +307,7 @@ const deleteComment = async (commentId) => {
       throw new Error(response.error || 'Ошибка при удалении комментария')
     }
   } catch (error) {
-    console.error('Ошибка при удалении комментария:', error)
-    showMessage(error.response?.data?.error || error.message || 'Ошибка при удалении комментария', 'danger')
+    showMessage('Ошибка при удалении комментария', 'danger')
   } finally {
     commentLoading.value = false
   }
@@ -340,6 +315,30 @@ const deleteComment = async (commentId) => {
 
 const editArticle = () => {
   router.push(`/edit-article/${article.value.id}`)
+}
+
+const deleteArticle = async () => {
+  if (!confirm('Вы уверены, что хотите удалить эту статью? Это действие нельзя отменить.')) {
+    return
+  }
+
+  try {
+    loading.value = true
+    const response = await articleService.deleteArticle(article.value.id)
+    
+    if (response.success) {
+      showMessage('Статья успешно удалена!', 'success')
+      setTimeout(() => {
+        router.push('/')
+      }, 1500)
+    } else {
+      throw new Error(response.error || 'Ошибка при удалении статьи')
+    }
+  } catch (error) {
+    showMessage(error.response?.data?.error || error.message || 'Ошибка при удалении статьи', 'danger')
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(() => {
@@ -350,7 +349,343 @@ onMounted(() => {
 <style scoped>
 .article-detail {
   min-height: calc(100vh - 80px);
-  padding-bottom: 2rem;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.alert {
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+}
+
+.alert-success {
+  background: rgba(66, 184, 131, 0.1);
+  color: #2c3e50;
+  border-left: 4px solid #42b883;
+}
+
+.alert-danger {
+  background: rgba(231, 76, 60, 0.1);
+  color: #2c3e50;
+  border-left: 4px solid #e74c3c;
+}
+
+.news-detail {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #e9ecef;
+}
+
+.display-6 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.article-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+}
+
+.bg-success {
+  background: #42b883 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+  margin-bottom: 0.5rem;
+}
+
+.article-content {
+  line-height: 1.8;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.lead {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #2c3e50;
+  white-space: pre-line;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.comments-section {
+  border-top: 2px solid #e9ecef;
+  padding-top: 2.5rem;
+  margin-top: 2rem;
+}
+
+.comments-section h4 {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-title {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.form-control {
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 1rem;
+  transition: all 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.form-control:focus {
+  border-color: #42b883;
+  box-shadow: 0 0 0 3px rgba(66, 184, 131, 0.1);
+  outline: none;
+}
+
+.form-control.is-invalid {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+textarea.form-control {
+  min-height: 120px;
+  resize: vertical;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: #42b883;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #369870;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(66, 184, 131, 0.3);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.btn-outline-warning {
+  border: 2px solid #ffc107;
+  color: #ffc107;
+  background: transparent;
+}
+
+.btn-outline-warning:hover {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btn-outline-danger {
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+  background: transparent;
+}
+
+.btn-outline-danger:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-outline-primary {
+  border: 2px solid #42b883;
+  color: #42b883;
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: #42b883;
+  color: white;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.text-primary {
+  color: #42b883 !important;
+}
+
+.card-subtitle {
+  color: #42b883;
+  font-weight: 600;
+}
+
+.border-top {
+  border-top: 2px solid #e9ecef !important;
+  padding-top: 2rem;
+}
+
+.spinner-border {
+  color: #42b883;
+}
+
+.invalid-feedback {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.small {
+  font-size: 0.875rem;
+}
+
+.card-text {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .news-detail {
+    padding: 2rem 1.5rem;
+  }
+  
+  .display-6 {
+    font-size: 2rem;
+  }
+  
+  .article-actions {
+    justify-content: flex-start;
+    margin-top: 1rem;
+  }
+  
+  .btn {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-detail {
+    padding: 1.5rem 1rem;
+  }
+  
+  .display-6 {
+    font-size: 1.75rem;
+  }
+  
+  .card-body {
+    padding: 1.25rem;
+  }
+  
+  .form-control {
+    padding: 0.875rem;
+  }
+  
+  .article-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .article-actions .btn {
+    width: 100%;
+  }
 }
 
 .loading, .error {
@@ -358,6 +693,9 @@ onMounted(() => {
   padding: 3rem;
   font-size: 1.2rem;
   color: #666;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .new-badge {
@@ -365,13 +703,7 @@ onMounted(() => {
   padding: 0.25rem 0.5rem;
 }
 
-.comments-section {
-  border-top: 1px solid #eee;
-  padding-top: 2rem;
-}
-
-.article-content {
-  line-height: 1.8;
-  font-size: 1.1rem;
+.flex-grow-1 {
+  flex-grow: 1;
 }
 </style>

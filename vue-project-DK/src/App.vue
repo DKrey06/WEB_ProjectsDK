@@ -4,11 +4,13 @@
     <main class="main-content">
       <RouterView />
     </main>
+    <Footer />
   </div>
 </template>
 
 <script setup>
 import Header from '@/components/common/Header.vue';
+import Footer from '@/components/common/Footer.vue';
 </script>
 
 <style>
@@ -31,8 +33,5 @@ body {
   flex-direction: column;
 }
 
-.main-content {
-  flex: 1;
-  padding-top: 0;
-}
+
 </style>

@@ -1,15 +1,22 @@
 <template>
-  <div class="create-article-page">
+  <div class="edit-article-page">
     <div class="container">
-      <h1>Создание новой статьи</h1>
-      <p>Заполните форму для создания статьи</p>
+      <h1>Редактирование статьи</h1>
+      <p>Внесите изменения в статью</p>
 
       <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger', 'alert-dismissible fade show']" role="alert">
         {{ message }}
         <button type="button" class="btn-close" @click="message = ''"></button>
       </div>
 
-      <form @submit.prevent="handleSubmit">
+      <div v-if="loading" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Загрузка...</span>
+        </div>
+        <div class="mt-2">Загрузка статьи...</div>
+      </div>
+
+      <form v-else @submit.prevent="handleSubmit">
         <div class="form-list">
           <div class="mb-3">
             <label class="form-label">Заголовок статьи:</label>
@@ -62,11 +69,14 @@
             <div v-if="errors.text" class="invalid-feedback">{{ errors.text }}</div>
           </div>
           
-          <div class="mb-3">
-            <button type="submit" class="btn btn-primary" :disabled="loading">
-              {{ loading ? 'Создание...' : 'Создать статью' }}
+          <div class="mb-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary" :disabled="submitting">
+              {{ submitting ? 'Сохранение...' : 'Сохранить изменения' }}
             </button>
-            <router-link to="/" class="btn btn-secondary">Отмена</router-link>
+            <router-link :to="`/articles/${articleId}`" class="btn btn-secondary">Отмена</router-link>
+            <button type="button" @click="deleteArticle" class="btn btn-danger ms-auto">
+              Удалить статью
+            </button>
           </div>
         </div>
       </form>
@@ -75,14 +85,14 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { ref, reactive, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { articleService } from '@/services/articles'
 
+const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 
+const articleId = route.params.id
 const form = reactive({
   title: '',
   category: '',
@@ -91,9 +101,31 @@ const form = reactive({
 })
 
 const errors = ref({})
-const loading = ref(false)
+const loading = ref(true)
+const submitting = ref(false)
 const message = ref('')
 const messageType = ref('')
+
+const fetchArticle = async () => {
+  try {
+    loading.value = true
+    const response = await articleService.getArticle(articleId)
+    
+    if (response.success) {
+      const article = response.article
+      form.title = article.title
+      form.category = article.category
+      form.text = article.text
+    } else {
+      throw new Error(response.error || 'Статья не найдена')
+    }
+  } catch (error) {
+    message.value = error.response?.data?.error || 'Ошибка загрузки статьи'
+    messageType.value = 'danger'
+  } finally {
+    loading.value = false
+  }
+}
 
 const validateForm = () => {
   errors.value = {}
@@ -118,7 +150,7 @@ const handleSubmit = async () => {
     return
   }
 
-  loading.value = true
+  submitting.value = true
   message.value = ''
 
   try {
@@ -128,26 +160,57 @@ const handleSubmit = async () => {
       category: form.newCategory || form.category
     }
 
-    const response = await articleService.createArticle(articleData)
+    const response = await articleService.updateArticle(articleId, articleData)
     
-    message.value = 'Статья успешно создана!'
+    message.value = 'Статья успешно обновлена!'
     messageType.value = 'success'
     
     setTimeout(() => {
-      router.push(`/articles/${response.article.id}`)
+      router.push(`/articles/${articleId}`)
     }, 1000)
 
   } catch (error) {
-    message.value = error.response?.data?.error || 'Ошибка создания статьи'
+    message.value = error.response?.data?.error || 'Ошибка обновления статьи'
     messageType.value = 'danger'
   } finally {
-    loading.value = false
+    submitting.value = false
   }
 }
+
+const deleteArticle = async () => {
+  if (!confirm('Вы уверены, что хотите удалить эту статью? Это действие нельзя отменить.')) {
+    return
+  }
+
+  try {
+    submitting.value = true
+    const response = await articleService.deleteArticle(articleId)
+    
+    if (response.success) {
+      message.value = 'Статья успешно удалена!'
+      messageType.value = 'success'
+      
+      setTimeout(() => {
+        router.push('/')
+      }, 1500)
+    } else {
+      throw new Error(response.error || 'Ошибка при удалении статьи')
+    }
+  } catch (error) {
+    message.value = error.response?.data?.error || 'Ошибка удаления статьи'
+    messageType.value = 'danger'
+  } finally {
+    submitting.value = false
+  }
+}
+
+onMounted(() => {
+  fetchArticle()
+})
 </script>
 
 <style scoped>
-.create-article-page {
+.edit-article-page {
   padding: 2rem 0;
   min-height: calc(100vh - 80px);
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -250,7 +313,6 @@ textarea.form-control {
   display: inline-block;
   cursor: pointer;
   transition: all 0.3s;
-  margin-right: 1rem;
 }
 
 .btn-primary {
@@ -271,6 +333,16 @@ textarea.form-control {
 
 .btn-secondary:hover {
   background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
   transform: translateY(-1px);
 }
 
@@ -311,6 +383,14 @@ textarea.form-control {
   display: block;
 }
 
+.d-flex.gap-2 {
+  gap: 1rem;
+}
+
+.ms-auto {
+  margin-left: auto;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 0 1rem;
@@ -324,10 +404,17 @@ textarea.form-control {
     font-size: 2rem;
   }
   
+  .d-flex.gap-2 {
+    flex-direction: column;
+  }
+  
   .btn {
     width: 100%;
-    margin-right: 0;
     margin-bottom: 1rem;
+  }
+  
+  .ms-auto {
+    margin-left: 0;
   }
 }
 
